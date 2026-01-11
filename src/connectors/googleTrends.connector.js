@@ -77,14 +77,10 @@ class GoogleTrendsConnector {
   }
 
   /**
-   * Generate regional data for Mexican states
+   * Generate comparison data for supported countries
    */
-  _generateRegionalData(keyword) {
-    const mexicanRegions = [
-      'MX-CMX', 'MX-JAL', 'MX-NLE', 'MX-PUE', 'MX-GUA',
-      'MX-CHH', 'MX-TAM', 'MX-BCN', 'MX-VER', 'MX-SON',
-      'MX-COA', 'MX-SIN', 'MX-MIC', 'MX-OAX', 'MX-QUE'
-    ];
+  _generateCountryComparison(keyword) {
+    const countries = ['MX', 'CR', 'ES'];
 
     // Seed for consistency
     let seed = 0;
@@ -97,8 +93,8 @@ class GoogleTrendsConnector {
       return min + (seed / 233280) * (max - min);
     };
 
-    return mexicanRegions.map(region => ({
-      region,
+    return countries.map(country => ({
+      country,
       value: Math.floor(seededRandom(10, 100))
     })).sort((a, b) => b.value - a.value); // Sort by value descending
   }
@@ -106,12 +102,12 @@ class GoogleTrendsConnector {
   /**
    * Fetch interest over time for a keyword (MOCK)
    */
-  async fetchTimeSeries(keyword, region, windowDays, baselineDays) {
+  async fetchTimeSeries(keyword, country, windowDays, baselineDays) {
     const { startDate, endDate } = getDateRange(windowDays, baselineDays);
     
     logger.info({ 
       keyword, 
-      region, 
+      country, 
       startDate, 
       endDate,
       mode: 'MOCK' 
@@ -124,7 +120,7 @@ class GoogleTrendsConnector {
     
     logger.info({ 
       keyword, 
-      region, 
+      country, 
       dataPoints: timeSeries.length,
       mode: 'MOCK'
     }, 'Successfully generated mock time series');
@@ -133,56 +129,55 @@ class GoogleTrendsConnector {
   }
 
   /**
-   * Fetch interest by region for a keyword (MOCK)
+   * Fetch comparison between countries for a keyword (MOCK)
    */
-  async fetchByRegion(keyword, country, windowDays, baselineDays) {
+  async fetchByCountry(keyword, windowDays, baselineDays) {
     const { startDate, endDate } = getDateRange(windowDays, baselineDays);
     
     logger.info({ 
       keyword, 
-      country, 
       startDate, 
       endDate,
       mode: 'MOCK'
-    }, 'Generating mock Google Trends regional data');
+    }, 'Generating mock Google Trends country comparison');
 
     // Simulate API delay
     await this._sleep(this.seededRandom(keyword, 300, 800));
 
-    const regionalData = this._generateRegionalData(keyword);
+    const countryData = this._generateCountryComparison(keyword);
     
     logger.info({ 
       keyword, 
-      country, 
-      regions: regionalData.length,
+      countries: countryData.length,
       mode: 'MOCK'
-    }, 'Successfully generated mock regional data');
+    }, 'Successfully generated mock country comparison');
 
-    return regionalData;
+    return countryData;
   }
 
   /**
-   * Fetch both time series and regional data (MOCK)
+   * Fetch both time series and country comparison (MOCK)
    */
-  async fetchComplete(keyword, region, windowDays, baselineDays) {
+  async fetchComplete(keyword, country, windowDays, baselineDays) {
     try {
       // Fetch both in parallel
-      const [timeSeries, byRegion] = await Promise.all([
-        this.fetchTimeSeries(keyword, region, windowDays, baselineDays),
-        this.fetchByRegion(keyword, 'MX', windowDays, baselineDays)
+      const [timeSeries, byCountry] = await Promise.all([
+        this.fetchTimeSeries(keyword, country, windowDays, baselineDays),
+        this.fetchByCountry(keyword, windowDays, baselineDays)
       ]);
 
       return {
         timeSeries,
-        byRegion,
-        source: 'mock_data', // Changed from 'google_trends'
+        byCountry,
+        source: 'mock_data',
         fetchedAt: new Date().toISOString()
       };
     } catch (error) {
-      logger.error({ error, keyword, region }, 'Failed to generate mock Google Trends data');
+      logger.error({ error, keyword, country }, 'Failed to generate mock Google Trends data');
       throw error;
     }
   }
+
 
   /**
    * Seeded random helper for consistent mock data

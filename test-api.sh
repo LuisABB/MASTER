@@ -35,14 +35,14 @@ echo ""
 # 3. Query de Tendencia (ejemplo simple)
 echo "3️⃣  Query de Tendencia"
 echo "   POST /v1/trends/query"
-echo -e "   ${YELLOW}Keyword: bitcoin, Region: MX-CMX, Window: 30 días${NC}"
+echo -e "   ${YELLOW}Keyword: bitcoin, Country: MX, Window: 30 días${NC}"
 echo ""
 
 curl -s -X POST http://localhost:3000/v1/trends/query \
   -H "Content-Type: application/json" \
   -d '{
     "keyword": "bitcoin",
-    "region": "MX-CMX",
+    "country": "MX",
     "window_days": 30,
     "baseline_days": 365
   }' | python3 -m json.tool

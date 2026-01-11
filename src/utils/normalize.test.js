@@ -67,26 +67,26 @@ describe('Utils: normalize.js', () => {
   });
 
   describe('normalizeRegionalData', () => {
-    test('debe normalizar datos regionales con geoCode', () => {
+    test('debe normalizar datos de países con geoCode', () => {
       const mockData = [
-        { geoCode: 'MX-CMX', value: 100 },
-        { geoCode: 'MX-JAL', value: 75 },
-        { geoCode: 'MX-NLE', value: 50 }
+        { geoCode: 'MX', value: 100 },
+        { geoCode: 'CR', value: 75 },
+        { geoCode: 'ES', value: 50 }
       ];
 
       const result = normalizeRegionalData(mockData);
 
       expect(result).toHaveLength(3);
       // Debe ordenar por value descendente
-      expect(result[0]).toEqual({ region: 'MX-CMX', value: 100 });
-      expect(result[1]).toEqual({ region: 'MX-JAL', value: 75 });
-      expect(result[2]).toEqual({ region: 'MX-NLE', value: 50 });
+      expect(result[0]).toEqual({ country: 'MX', value: 100 });
+      expect(result[1]).toEqual({ country: 'CR', value: 75 });
+      expect(result[2]).toEqual({ country: 'ES', value: 50 });
     });
 
     test('debe parsear valores a enteros', () => {
       const mockData = [
-        { geoCode: 'MX-CMX', value: '88' },
-        { geoCode: 'MX-JAL', value: 75.9 }
+        { geoCode: 'MX', value: '88' },
+        { geoCode: 'CR', value: 75.9 }
       ];
 
       const result = normalizeRegionalData(mockData);
@@ -102,7 +102,7 @@ describe('Utils: normalize.js', () => {
 
       const result = normalizeRegionalData(mockData);
 
-      expect(result[0].region).toBe('UNKNOWN');
+      expect(result[0].country).toBe('UNKNOWN');
     });
 
     test('debe ordenar por value descendente', () => {

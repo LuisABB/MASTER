@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { isRegionSupported } from '../utils/regionMap.js';
+import { isCountrySupported } from '../utils/regionMap.js';
 
 /**
  * Validation schema for trend query
@@ -11,11 +11,13 @@ export const trendQuerySchema = z.object({
     .max(60, 'Keyword must be at most 60 characters')
     .trim(),
   
-  region: z
+  country: z
     .string()
+    .length(2, 'Country code must be 2 characters (ISO 3166-1 alpha-2)')
+    .toUpperCase()
     .refine(
-      (val) => isRegionSupported(val),
-      (val) => ({ message: `Region "${val}" is not supported` })
+      (val) => isCountrySupported(val),
+      (val) => ({ message: `Country "${val}" is not supported. Supported: MX, CR, ES` })
     ),
   
   window_days: z

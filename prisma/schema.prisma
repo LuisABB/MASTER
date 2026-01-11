@@ -13,7 +13,7 @@ datasource db {
 model TrendQuery {
   id           String    @id @default(uuid())
   keyword      String
-  region       String
+  country      String
   windowDays   Int       @map("window_days")
   baselineDays Int       @map("baseline_days")
   status       QueryStatus @default(RUNNING)
@@ -24,9 +24,9 @@ model TrendQuery {
   // Relations
   result       TrendResult?
   series       TrendSeriesPoint[]
-  byRegion     TrendByRegion[]
+  byCountry    TrendByCountry[]
 
-  @@index([keyword, region, windowDays, baselineDays], name: "idx_query_cache_lookup")
+  @@index([keyword, country, windowDays, baselineDays], name: "idx_query_cache_lookup")
   @@index([createdAt], name: "idx_created_at")
   @@index([status], name: "idx_status")
   @@map("trend_queries")
@@ -62,18 +62,18 @@ model TrendSeriesPoint {
   @@map("trend_series")
 }
 
-model TrendByRegion {
+model TrendByCountry {
   id       BigInt     @id @default(autoincrement())
   queryId  String     @map("query_id")
-  region   String
+  country  String
   value    Int
 
   // Relations
   query    TrendQuery @relation(fields: [queryId], references: [id], onDelete: Cascade)
 
-  @@index([queryId], name: "idx_by_region_query")
-  @@index([region], name: "idx_by_region")
-  @@map("trend_by_region")
+  @@index([queryId], name: "idx_by_country_query")
+  @@index([country], name: "idx_by_country")
+  @@map("trend_by_country")
 }
 
 enum QueryStatus {

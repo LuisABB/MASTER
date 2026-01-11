@@ -8,7 +8,7 @@ export async function queryTrend(req, res, next) {
   try {
     const params = {
       keyword: req.validatedBody.keyword,
-      region: req.validatedBody.region,
+      country: req.validatedBody.country,
       windowDays: req.validatedBody.window_days,
       baselineDays: req.validatedBody.baseline_days
     };

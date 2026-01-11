@@ -9,14 +9,14 @@ class ScoringService {
   /**
    * Calculate trend score and signals from time series data
    */
-  calculateScore(timeSeries, keyword, region) {
+  calculateScore(timeSeries, keyword, country) {
     if (!timeSeries || timeSeries.length === 0) {
       throw new Error('Time series data is empty');
     }
 
     logger.info({ 
       keyword, 
-      region, 
+      country, 
       dataPoints: timeSeries.length 
     }, 'Calculating trend score');
 
@@ -34,11 +34,11 @@ class ScoringService {
     const trendScore = this._calculateFinalScore(signals);
 
     // Generate explanations
-    const explain = this._generateExplanations(signals, keyword, region);
+    const explain = this._generateExplanations(signals, keyword, country);
 
     logger.info({ 
       keyword, 
-      region, 
+      country, 
       trendScore, 
       signals 
     }, 'Trend score calculated');
@@ -152,7 +152,7 @@ class ScoringService {
   /**
    * Generate human-readable explanations
    */
-  _generateExplanations(signals, keyword, region) {
+  _generateExplanations(signals, keyword, country) {
     const explanations = [];
 
     // Growth explanation
@@ -195,8 +195,8 @@ class ScoringService {
       );
     }
 
-    // Region context
-    explanations.push(`Los datos corresponden a la región ${region}.`);
+    // Country context
+    explanations.push(`Los datos corresponden al país ${country}.`);
 
     return explanations;
   }

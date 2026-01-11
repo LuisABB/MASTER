@@ -4,7 +4,7 @@ API multi-fuente para análisis de tendencias. MVP 1 implementa Google Trends co
 
 ## 🚀 Características
 
-- ✅ **Google Trends Integration**: Datos temporales y regionales
+- ✅ **Google Trends Integration**: Datos temporales por país (México, Costa Rica, España)
 - ✅ **Scoring Automático**: Algoritmo de 3 señales (growth, slope, peak)
 - ✅ **Cache Inteligente**: Redis con TTL configurable (6-24h)
 - ✅ **Persistencia**: PostgreSQL con historial completo
@@ -105,7 +105,7 @@ Content-Type: application/json
 
 {
   "keyword": "scooter",
-  "region": "MX-CMX",
+  "country": "MX",
   "window_days": 90,
   "baseline_days": 365
 }
@@ -115,7 +115,7 @@ Content-Type: application/json
 ```json
 {
   "keyword": "scooter",
-  "region": "MX-CMX",
+  "country": "MX",
   "window_days": 90,
   "baseline_days": 365,
   "generated_at": "2026-01-10T12:00:00Z",
@@ -130,15 +130,16 @@ Content-Type: application/json
     { "date": "2025-10-15", "value": 21 },
     { "date": "2025-10-16", "value": 19 }
   ],
-  "by_region": [
-    { "region": "MX-CMX", "value": 100 },
-    { "region": "MX-JAL", "value": 78 }
+  "by_country": [
+    { "country": "MX", "value": 100 },
+    { "country": "CR", "value": 78 },
+    { "country": "ES", "value": 65 }
   ],
   "explain": [
     "El interés en los últimos 7 días creció 34% vs los últimos 30 días.",
     "La tendencia de los últimos 14 días es positiva (creciente).",
     "El interés reciente alcanzó 92% del máximo posible.",
-    "Los datos corresponden a la región MX-CMX."
+    "Los datos corresponden a México (MX)."
   ],
   "cache": {
     "hit": false,
@@ -148,20 +149,20 @@ Content-Type: application/json
 }
 ```
 
-### Listar Regiones Soportadas
+### Listar Países Soportados
 
 ```bash
-GET /v1/regions
+GET /v1/countries
 ```
 
 **Response:**
 ```json
 {
-  "count": 15,
-  "regions": [
-    { "code": "MX-CMX", "name": "Ciudad de México" },
-    { "code": "MX-JAL", "name": "Jalisco" },
-    { "code": "MX-NLE", "name": "Nuevo León" }
+  "count": 3,
+  "countries": [
+    { "code": "MX", "name": "México" },
+    { "code": "CR", "name": "Costa Rica" },
+    { "code": "ES", "name": "España" }
   ]
 }
 ```
@@ -171,18 +172,18 @@ GET /v1/regions
 ### Con curl
 
 ```bash
-# Consultar tendencia de "scooter" en CDMX
+# Consultar tendencia de "scooter" en México
 curl -X POST http://localhost:3000/v1/trends/query \
   -H "Content-Type: application/json" \
   -d '{
     "keyword": "scooter",
-    "region": "MX-CMX",
+    "country": "MX",
     "window_days": 90,
     "baseline_days": 365
   }'
 
-# Ver regiones soportadas
-curl http://localhost:3000/v1/regions
+# Ver países soportados
+curl http://localhost:3000/v1/countries
 
 # Health check
 curl http://localhost:3000/health
@@ -196,7 +197,7 @@ const response = await fetch('http://localhost:3000/v1/trends/query', {
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
     keyword: 'scooter',
-    region: 'MX-CMX',
+    country: 'MX',
     window_days: 90,
     baseline_days: 365
   })
@@ -250,7 +251,7 @@ score = 100 * clamp(0.5*norm(growth) + 0.3*norm(slope) + 0.2*peak, 0, 1)
 │   ├── routes/
 │   │   ├── trends.routes.js        # Rutas de tendencias
 │   │   ├── health.routes.js        # Health check
-│   │   └── regions.routes.js       # Regiones soportadas
+│   │   └── countries.routes.js     # Países soportados
 │   ├── controllers/
 │   │   └── trends.controller.js    # Controlador principal
 │   ├── services/
@@ -272,7 +273,7 @@ score = 100 * clamp(0.5*norm(growth) + 0.3*norm(slope) + 0.2*peak, 0, 1)
 │       ├── logger.js               # Logger Pino
 │       ├── dates.js                # Helpers de fechas
 │       ├── normalize.js            # Normalización de datos
-│       └── regionMap.js            # Mapeo de regiones
+│       └── regionMap.js            # Mapeo de países (legacy name)
 ├── prisma/
 │   └── schema.prisma               # Esquema de base de datos
 ├── package.json
@@ -300,7 +301,7 @@ npm run db:reset        # Reset completo de DB
 ### Validaciones
 
 - **keyword**: 2-60 caracteres
-- **region**: Debe estar en lista de regiones soportadas
+- **country**: Código ISO 3166-1 alpha-2 (MX, CR, ES)
 - **window_days**: Solo valores permitidos: 7, 30, 90, 365
 - **baseline_days**: Máximo 730 días (2 años), debe ser ≥ window_days
 
@@ -338,7 +339,7 @@ Abre en `http://localhost:5555`
 ```bash
 docker exec -it trends-redis redis-cli
 > KEYS trend:*
-> GET "trend:scooter:MX-CMX:90:365"
+> GET "trend:scooter:MX:90:365"
 ```
 
 ## ⚠️ Manejo de Errores
@@ -350,8 +351,8 @@ La API devuelve errores consistentes:
   "error": "Validation failed",
   "details": [
     {
-      "field": "region",
-      "message": "Region \"MX-XXX\" is not supported"
+      "field": "country",
+      "message": "Country \"XX\" is not supported. Supported: MX, CR, ES"
     }
   ],
   "request_id": "550e8400-e29b-41d4-a716-446655440000"
@@ -379,7 +380,7 @@ La API devuelve errores consistentes:
 
 ### Cache Strategy
 
-- **Key format**: `trend:{keyword}:{region}:{window}:{baseline}`
+- **Key format**: `trend:{keyword}:{country}:{window}:{baseline}`
 - **TTL**: 6-24 horas (configurable)
 - **Cache miss**: Fetch from Google Trends → Score → Persist → Cache → Return
 
@@ -387,14 +388,15 @@ La API devuelve errores consistentes:
 
 - **Postgres 16**: Relacional robusto
 - **Prisma ORM**: Type-safe queries
-- **Índices optimizados**: Para lookups de cache y queries por región/keyword
+- **Índices optimizados**: Para lookups de cache y queries por país/keyword
 
 ### Google Trends Connector
 
 - **Max retries**: 3 (configurable)
 - **Retry delay**: 2 segundos con backoff
 - **Retryable errors**: ECONNRESET, ETIMEDOUT, 429, 503, 504
-- **Parallel fetches**: Time series + Regional data simultáneo
+- **Parallel fetches**: Time series + Country comparison simultáneo
+- **Supported countries**: México (MX), Costa Rica (CR), España (ES)
 
 ## 📄 Licencia
 

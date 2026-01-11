@@ -14,18 +14,18 @@ class TrendEngineService {
    * Execute trend query with caching and persistence
    */
   async executeTrendQuery(params, requestId) {
-    const { keyword, region, windowDays, baselineDays } = params;
+    const { keyword, country, windowDays, baselineDays } = params;
 
     logger.info({ 
       requestId, 
       keyword, 
-      region, 
+      country, 
       windowDays, 
       baselineDays 
     }, 'Executing trend query');
 
     // Check cache first
-    const cacheKey = cache.generateKey(keyword, region, windowDays, baselineDays);
+    const cacheKey = cache.generateKey(keyword, country, windowDays, baselineDays);
     const cachedResult = await cache.get(cacheKey);
 
     if (cachedResult) {
@@ -49,7 +49,7 @@ class TrendEngineService {
       // Fetch data from Google Trends
       const trendsData = await googleTrendsConnector.fetchComplete(
         keyword,
-        region,
+        country,
         windowDays,
         baselineDays
       );
@@ -58,7 +58,7 @@ class TrendEngineService {
       const scoring = scoringService.calculateScore(
         trendsData.timeSeries,
         keyword,
-        region
+        country
       );
 
       // Persist results to database
@@ -70,7 +70,7 @@ class TrendEngineService {
       // Build response
       const response = {
         keyword,
-        region,
+        country,
         window_days: windowDays,
         baseline_days: baselineDays,
         generated_at: new Date().toISOString(),
@@ -78,7 +78,7 @@ class TrendEngineService {
         trend_score: scoring.trendScore,
         signals: scoring.signals,
         series: trendsData.timeSeries,
-        by_region: trendsData.byRegion,
+        by_country: trendsData.byCountry,
         explain: scoring.explain,
         cache: {
           hit: false,
@@ -93,7 +93,7 @@ class TrendEngineService {
       logger.info({ 
         requestId, 
         keyword, 
-        region, 
+        country, 
         trendScore: scoring.trendScore 
       }, 'Trend query completed successfully');
 
@@ -107,15 +107,15 @@ class TrendEngineService {
         requestId, 
         error, 
         keyword, 
-        region 
+        country 
       }, 'Trend query failed');
 
       // Determine if it's a data availability issue or system error
       if (error.message.includes('Invalid response') || error.message.includes('No data')) {
         throw new AppError(
-          `No trend data available for keyword "${keyword}" in region "${region}"`,
+          `No trend data available for keyword "${keyword}" in country "${country}"`,
           404,
-          { keyword, region }
+          { keyword, country }
         );
       }
 
@@ -135,7 +135,7 @@ class TrendEngineService {
       return await prisma.trendQuery.create({
         data: {
           keyword: params.keyword,
-          region: params.region,
+          country: params.country,
           windowDays: params.windowDays,
           baselineDays: params.baselineDays,
           status: 'RUNNING'
@@ -176,12 +176,12 @@ class TrendEngineService {
           });
         }
 
-        // Create regional data
-        if (trendsData.byRegion && trendsData.byRegion.length > 0) {
-          await tx.trendByRegion.createMany({
-            data: trendsData.byRegion.map(point => ({
+        // Create country comparison data
+        if (trendsData.byCountry && trendsData.byCountry.length > 0) {
+          await tx.trendByCountry.createMany({
+            data: trendsData.byCountry.map(point => ({
               queryId,
-              region: point.region,
+              country: point.country,
               value: point.value
             }))
           });

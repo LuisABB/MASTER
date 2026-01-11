@@ -16,7 +16,7 @@ export function normalizeTimeSeries(rawData) {
 }
 
 /**
- * Normalize regional data to standard format
+ * Normalize country comparison data to standard format
  */
 export function normalizeRegionalData(rawData) {
   if (!Array.isArray(rawData)) {
@@ -26,7 +26,7 @@ export function normalizeRegionalData(rawData) {
   return rawData
     .filter(point => point && point.value !== undefined)
     .map(point => ({
-      region: point.geoCode || point.region || 'UNKNOWN',
+      country: point.geoCode || point.country || 'UNKNOWN',
       value: parseInt(point.value, 10) || 0
     }))
     .sort((a, b) => b.value - a.value); // Sort by value descending

@@ -10,7 +10,7 @@ import { errorHandler, notFoundHandler } from './middleware/error.middleware.js'
 // Routes
 import healthRoutes from './routes/health.routes.js';
 import trendsRoutes from './routes/trends.routes.js';
-import regionsRoutes from './routes/regions.routes.js';
+import countriesRoutes from './routes/countries.routes.js';
 
 const app = express();
 
@@ -80,7 +80,7 @@ app.get('/', (req, res) => {
     endpoints: {
       health: '/health',
       trends: '/v1/trends/query',
-      regions: '/v1/regions'
+      countries: '/v1/countries'
     }
   });
 });
@@ -88,7 +88,7 @@ app.get('/', (req, res) => {
 // API Routes
 app.use('/health', healthRoutes);
 app.use('/v1/trends', trendsRoutes);
-app.use('/v1/regions', regionsRoutes);
+app.use('/v1/countries', countriesRoutes);
 
 // 404 handler
 app.use(notFoundHandler);

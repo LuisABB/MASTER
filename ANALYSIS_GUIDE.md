@@ -10,7 +10,7 @@ Esta guía te ayudará a interpretar los resultados de la API de Trends y tomar 
 2. [Trend Score: La Métrica Clave](#trend-score-la-métrica-clave)
 3. [Las 3 Señales de Tendencia](#las-3-señales-de-tendencia)
 4. [Interpretando Series Temporales](#interpretando-series-temporales)
-5. [Análisis Regional](#análisis-regional)
+5. [Análisis por País](#análisis-por-país)
 6. [Casos de Uso Reales](#casos-de-uso-reales)
 7. [Mejores Prácticas](#mejores-prácticas)
 
@@ -24,7 +24,7 @@ Cuando consultas la API con:
 POST /v1/trends/query
 {
   "keyword": "bitcoin",
-  "region": "MX-CMX",
+  "country": "MX",
   "window_days": 30,
   "baseline_days": 365
 }
@@ -36,7 +36,7 @@ Obtienes una respuesta estructurada en **7 secciones clave**:
 {
   // 1. METADATA
   "keyword": "bitcoin",
-  "region": "MX-CMX",
+  "country": "MX",
   "window_days": 30,
   "baseline_days": 365,
   "generated_at": "2026-01-11T05:05:00.161Z",
@@ -55,8 +55,8 @@ Obtienes una respuesta estructurada en **7 secciones clave**:
   // 4. SERIE TEMPORAL (366 días)
   "series": [...],
   
-  // 5. COMPARACIÓN REGIONAL
-  "by_region": [...],
+  // 5. COMPARACIÓN INTERNACIONAL
+  "by_country": [...],
   
   // 6. EXPLICACIÓN EN LENGUAJE NATURAL
   "explain": [...],
@@ -263,69 +263,58 @@ trend_score = (growth_7_vs_30 × 50%) + (slope_14d × 30%) + (recent_peak_30d ×
 
 ---
 
-## Análisis Regional
+## Análisis por País
 
 ### Estructura de Datos
 
 ```json
-"by_region": [
-  { "region": "MX-CMX", "value": 88 },
-  { "region": "MX-GUA", "value": 84 },
-  { "region": "MX-PUE", "value": 74 },
-  ...
-  { "region": "MX-TAM", "value": 10 }
+"by_country": [
+  { "country": "MX", "value": 100 },
+  { "country": "CR", "value": 78 },
+  { "country": "ES", "value": 65 }
 ]
 ```
 
-- **15 estados mexicanos** ordenados por interés descendente
-- **Valores 0-100** (relativo al estado con más interés)
-- **Códigos ISO 3166-2** para regiones
+- **3 países** ordenados por interés descendente
+- **Valores 0-100** (relativo al país con más interés)
+- **Códigos ISO 3166-1 alpha-2** para países
 
-### Códigos de Región
+### Códigos de País
 
-| Código | Estado | Código | Estado |
-|--------|--------|--------|--------|
-| MX-CMX | Ciudad de México | MX-VER | Veracruz |
-| MX-JAL | Jalisco | MX-SON | Sonora |
-| MX-NLE | Nuevo León | MX-COA | Coahuila |
-| MX-PUE | Puebla | MX-SIN | Sinaloa |
-| MX-GUA | Guanajuato | MX-MIC | Michoacán |
-| MX-CHH | Chihuahua | MX-OAX | Oaxaca |
-| MX-TAM | Tamaulipas | MX-QUE | Querétaro |
-| MX-BCN | Baja California | | |
+| Código | País |
+|--------|------|
+| MX | México |
+| CR | Costa Rica |
+| ES | España |
 
 ### Cómo Interpretar
 
-#### Concentración Alta
+#### Dominancia de un País
 ```json
-"by_region": [
-  { "region": "MX-CMX", "value": 88 },  // Top
-  { "region": "MX-GUA", "value": 84 },
-  { "region": "MX-PUE", "value": 74 },
-  ...
-  { "region": "MX-TAM", "value": 10 }   // Bottom
+"by_country": [
+  { "country": "MX", "value": 100 },  // Dominante
+  { "country": "CR", "value": 45 },   // Medio
+  { "country": "ES", "value": 22 }    // Bajo
 ]
 ```
 **Interpretación:**
-- **Diferencia top-bottom: 78 puntos** → Concentración MUY alta
-- Focus en CDMX/Guanajuato para máximo ROI
-- Tamaulipas/Chihuahua no son mercados objetivo
+- **Diferencia MX-ES: 78 puntos** → México domina el interés
+- Focus en México para máximo ROI
+- España muestra poco interés comparativamente
 
 ---
 
-#### Distribución Uniforme
+#### Distribución Balanceada
 ```json
-"by_region": [
-  { "region": "MX-CMX", "value": 65 },
-  { "region": "MX-JAL", "value": 63 },
-  { "region": "MX-NLE", "value": 60 },
-  ...
-  { "region": "MX-TAM", "value": 55 }
+"by_country": [
+  { "country": "MX", "value": 100 },
+  { "country": "ES", "value": 95 },
+  { "country": "CR", "value": 88 }
 ]
 ```
 **Interpretación:**
-- **Diferencia top-bottom: 10 puntos** → Interés nacional
-- Estrategia multi-regional viable
+- **Diferencia mínima** → Interés internacional equilibrado
+- Estrategia multi-país viable
 - No necesitas geo-targeting agresivo
 
 ---
@@ -341,7 +330,7 @@ trend_score = (growth_7_vs_30 × 50%) + (slope_14d × 30%) + (recent_peak_30d ×
 POST /v1/trends/query
 {
   "keyword": "inteligencia artificial",
-  "region": "MX-CMX",
+  "country": "MX",
   "window_days": 7,
   "baseline_days": 30
 }
@@ -371,38 +360,38 @@ POST /v1/trends/query
 
 ### 📱 Caso 2: Marketing de Producto
 
-**Objetivo:** Elegir entre 3 regiones para campaña
+**Objetivo:** Elegir el mejor país para lanzar campaña
 
 **Consultas:**
 ```bash
-# Opción A: CDMX
-POST /v1/trends/query {"keyword": "tenis running", "region": "MX-CMX"}
+# Opción A: México
+POST /v1/trends/query {"keyword": "tenis running", "country": "MX"}
 
-# Opción B: Guadalajara
-POST /v1/trends/query {"keyword": "tenis running", "region": "MX-JAL"}
+# Opción B: Costa Rica
+POST /v1/trends/query {"keyword": "tenis running", "country": "CR"}
 
-# Opción C: Monterrey
-POST /v1/trends/query {"keyword": "tenis running", "region": "MX-NLE"}
+# Opción C: España
+POST /v1/trends/query {"keyword": "tenis running", "country": "ES"}
 ```
 
 **Resultados:**
 ```json
-// CDMX
-{ "trend_score": 45, "by_region": [{"region": "MX-CMX", "value": 88}] }
+// México
+{ "trend_score": 45, "by_country": [{"country": "MX", "value": 88}] }
 
-// Guadalajara
-{ "trend_score": 52, "by_region": [{"region": "MX-JAL", "value": 71}] }
+// Costa Rica
+{ "trend_score": 52, "by_country": [{"country": "CR", "value": 71}] }
 
-// Monterrey
-{ "trend_score": 68, "by_region": [{"region": "MX-NLE", "value": 95}] }
+// España
+{ "trend_score": 68, "by_country": [{"country": "ES", "value": 95}] }
 ```
 
 **Decisión:**
-- ❌ CDMX: Score 45, interés alto pero **decreciendo**
-- ⚠️ Guadalajara: Score 52, interés medio
-- ✅ **Monterrey: Score 68, interés MUY alto y creciendo**
+- ❌ México: Score 45, interés alto pero **decreciendo**
+- ⚠️ Costa Rica: Score 52, interés medio
+- ✅ **España: Score 68, interés MUY alto y creciendo**
 
-**Acción:** ✅ Lanzar campaña en **Monterrey primero**, luego expandir a CDMX.
+**Acción:** ✅ Lanzar campaña en **España primero**, luego expandir a México.
 
 ---
 
@@ -588,21 +577,20 @@ POST /v1/trends/query {"keyword": "producto C"}  # Score: 38
 
 ### 6. 🗺️ Geo-Targeting Inteligente
 
-**Usa `by_region` para optimizar presupuesto:**
+**Usa `by_country` para optimizar presupuesto:**
 
 ```json
-"by_region": [
-  { "region": "MX-CMX", "value": 88 },  // 35% del presupuesto
-  { "region": "MX-GUA", "value": 84 },  // 30% del presupuesto
-  { "region": "MX-JAL", "value": 66 },  // 20% del presupuesto
-  { "region": "MX-NLE", "value": 47 },  // 15% del presupuesto
-  // Resto: ignorar (< 40 value)
+"by_country": [
+  { "country": "MX", "value": 100 },  // 50% del presupuesto
+  { "country": "ES", "value": 75 },   // 35% del presupuesto
+  { "country": "CR", "value": 45 }    // 15% del presupuesto
 ]
 ```
 
 **ROI esperado:**
-- CDMX: Alto volumen + alto interés = **ROI máximo**
-- Estados <40: Bajo interés = **desperdiciar dinero**
+- México: Alto volumen + alto interés = **ROI máximo**
+- Costa Rica: Interés moderado = **ROI medio**
+- Ajustar distribución según objetivos de mercado
 
 ---
 
@@ -632,7 +620,7 @@ Antes de tomar acción, verifica:
 |----------|------------------|--------|--------|
 | **Contenido viral** | `growth_7_vs_30` | > 1.3 | Crear YA |
 | **SEO largo plazo** | `slope_14d` | > 0.05 | Invertir |
-| **Campaña regional** | `by_region[0].value` | > 80 | Geo-target top 3 |
+| **Campaña internacional** | `by_country[0].value` | > 80 | Geo-target top país |
 | **Detección emergente** | `trend_score` + `growth` | > 70 + 1.4 | First mover |
 | **Evitar fracaso** | `trend_score` | < 40 | No invertir |
 
@@ -649,8 +637,8 @@ A: 6 horas (21600 segundos). Puedes verificar en `cache.ttl_seconds`.
 **Q: ¿Qué significa `sources_used: ["mock_data"]`?**  
 A: Estás usando datos simulados para testing. En producción será `["google_trends"]` o `["serpapi"]`.
 
-**Q: ¿Puedo comparar regiones de diferentes países?**  
-A: No en MVP1. Actualmente solo México (MX-*). Próximas versiones incluirán multi-país.
+**Q: ¿Puedo comparar países con una sola consulta?**  
+A: Sí, cada consulta incluye comparación automática entre México (MX), Costa Rica (CR) y España (ES) en el campo `by_country`.
 
 **Q: ¿Los valores de `series` son búsquedas totales?**  
 A: No, son **interés relativo normalizado 0-100**. 100 = momento de máximo interés en el período analizado.
