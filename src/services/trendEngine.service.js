@@ -74,7 +74,7 @@ class TrendEngineService {
         window_days: windowDays,
         baseline_days: baselineDays,
         generated_at: new Date().toISOString(),
-        sources_used: ['google_trends'],
+        sources_used: [trendsData.source || 'google_trends'],
         trend_score: scoring.trendScore,
         signals: scoring.signals,
         series: trendsData.timeSeries,
@@ -108,7 +108,35 @@ class TrendEngineService {
         error, 
         keyword, 
         country 
-      }, 'Trend query failed');
+      }, 'Trend query failed - attempting stale cache fallback');
+
+      // 🔥 FALLBACK: Intentar devolver datos cacheados stale
+      const staleData = await cache.getStale(cacheKey);
+      
+      if (staleData) {
+        logger.warn({ 
+          requestId, 
+          keyword, 
+          country,
+          staleAge: staleData.age 
+        }, 'Returning stale cached data due to API failure');
+
+        return {
+          ...staleData,
+          cache: {
+            hit: true,
+            stale: true,
+            age_hours: Math.round(staleData.age / 3600),
+            ttl_seconds: 0
+          },
+          warning: 'Data may be outdated due to temporary API issues',
+          sources_used: ['stale_cache']
+        };
+      }
+
+      // Si no hay datos stale, lanzar error original
+      logger.error({ requestId, keyword, country }, 
+        'No stale cache available, failing request');
 
       // Determine if it's a data availability issue or system error
       if (error.message.includes('Invalid response') || error.message.includes('No data')) {

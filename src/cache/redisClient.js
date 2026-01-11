@@ -37,9 +37,10 @@ process.on('beforeExit', async () => {
 export const cache = {
   /**
    * Generate cache key for trend query
+   * Version is included to prevent conflicts when data structure changes
    */
-  generateKey(keyword, region, windowDays, baselineDays) {
-    return `trend:${keyword.toLowerCase()}:${region}:${windowDays}:${baselineDays}`;
+  generateKey(keyword, region, windowDays, baselineDays, version = 'v4') {
+    return `trend:${version}:${keyword.toLowerCase()}:${region}:${windowDays}:${baselineDays}`;
   },
 
   /**
@@ -56,11 +57,49 @@ export const cache = {
   },
 
   /**
+   * Get stale cached data (incluso si expiró)
+   * Útil como fallback cuando la API falla
+   */
+  async getStale(key) {
+    try {
+      const staleKey = `${key}:stale`;
+      const data = await redis.get(staleKey);
+      
+      if (!data) {
+        return null;
+      }
+
+      const parsed = JSON.parse(data);
+      const now = Date.now();
+      const age = Math.floor((now - parsed.cachedAt) / 1000); // Age in seconds
+
+      return {
+        ...parsed.data,
+        age, // Edad en segundos
+        cachedAt: parsed.cachedAt
+      };
+    } catch (error) {
+      logger.error({ error, key }, 'Stale cache get error');
+      return null;
+    }
+  },
+
+  /**
    * Set cached trend result with TTL
    */
-  async set(key, value, ttlSeconds = parseInt(process.env.CACHE_TTL_SECONDS || '21600', 10)) {
+  async set(key, value, ttlSeconds = parseInt(process.env.CACHE_TTL_SECONDS || '86400', 10)) {
     try {
+      // Guardar en cache normal
       await redis.setex(key, ttlSeconds, JSON.stringify(value));
+
+      // Guardar copia stale con TTL más largo (para fallback)
+      const staleTTL = parseInt(process.env.CACHE_STALE_TTL_SECONDS || '172800', 10);
+      const staleKey = `${key}:stale`;
+      await redis.setex(staleKey, staleTTL, JSON.stringify({
+        data: value,
+        cachedAt: Date.now()
+      }));
+
       return true;
     } catch (error) {
       logger.error({ error, key }, 'Cache set error');

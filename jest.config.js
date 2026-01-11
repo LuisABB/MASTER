@@ -5,7 +5,8 @@ export default {
   collectCoverageFrom: [
     'src/**/*.js',
     '!src/server.js',
-    '!src/**/*.test.js'
+    '!src/**/*.test.js',
+    '!src/__mocks__/**'
   ],
   moduleFileExtensions: ['js', 'json'],
   testPathIgnorePatterns: ['/node_modules/', '/dist/'],

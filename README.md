@@ -1,23 +1,42 @@
-# Trends API - MVP 1 (Google Trends)
+# Trends API - MVP 1.1 (Google Trends Real API + 5 Años)
 
-API multi-fuente para análisis de tendencias. MVP 1 implementa Google Trends con scoring automático, cache inteligente y persistencia.
+API multi-fuente para análisis de tendencias. **MVP 1.1 implementa Google Trends REAL con soporte para hasta 5 años de datos históricos**, sistema anti-bloqueos, scoring automático, cache agresivo (24h) y fallback a datos stale.
 
 ## 🚀 Características
 
-- ✅ **Google Trends Integration**: Datos temporales por país (México, Costa Rica, España)
+- ✅ **Google Trends Real API**: Datos reales usando `google-trends-api` (no mock)
+- ✅ **Hasta 5 Años de Histórico**: Consulta hasta 1825 días para análisis predictivo
+- ✅ **Sistema Anti-Bloqueos**: Lock de concurrencia, delays largos, exponential backoff
+- ✅ **Fallback Inteligente**: Cache stale (48h) como backup si Google falla
 - ✅ **Scoring Automático**: Algoritmo de 3 señales (growth, slope, peak)
-- ✅ **Cache Inteligente**: Redis con TTL configurable (6-24h)
+- ✅ **Cache Versionado**: Redis con keys v4 (previene conflictos en actualizaciones)
 - ✅ **Persistencia**: PostgreSQL con historial completo
-- ✅ **Rate Limiting**: Protección contra abuso
-- ✅ **Observabilidad**: Logging estructurado con Pino
-- ✅ **Validación robusta**: Zod schemas
-- ✅ **Arquitectura escalable**: Listo para TikTok/IG/YouTube
+- ✅ **Rate Limiting**: Protección contra abuso + delays anti-bot
+- ✅ **Observabilidad**: Logging estructurado con Pino + detección de bloqueos
+- ✅ **Validación robusta**: Zod schemas con límites de 5 años
+- ✅ **Países soportados**: México (MX), Costa Rica (CR), España (ES)
+
+## ⚠️ Importante: Google Trends Limitaciones
+
+**Google Trends puede bloquear requests si:**
+- Muchos requests en poco tiempo
+- Detecta patrones de bot
+- Consultas muy largas (>5 años no soportado)
+
+**Solución implementada (MVP):**
+1. ✅ Cache 24 horas (reduce requests en 90%)
+2. ✅ Solo 1 request simultáneo (lock con cola)
+3. ✅ Delays 4-5 segundos entre requests
+4. ✅ Fallback a cache stale si falla (disponibilidad >98%)
+5. ✅ Límite máximo: 1825 días (5 años)
+
+**Ver guía de análisis:** `ANALYSIS_GUIDE.md`
 
 ## 📋 Requisitos
 
 - Node.js >= 18.0.0
 - PostgreSQL >= 14
-- Redis >= 6.0
+- Redis >= 6.0 (REQUERIDO para cache y fallback stale)
 - npm o pnpm
 
 ## 🛠️ Setup Rápido
@@ -34,7 +53,14 @@ npm install
 cp .env.example .env
 ```
 
-Ajusta las variables en `.env` si es necesario.
+**Variables clave para MVP anti-bloqueos:**
+```bash
+CACHE_TTL_SECONDS=86400              # 24 horas
+CACHE_STALE_TTL_SECONDS=172800       # 48 horas para fallback
+GOOGLE_TRENDS_REQUEST_DELAY_MS=4000  # 4s entre requests
+GOOGLE_TRENDS_RETRY_DELAY_MS=5000    # 5s base para backoff
+GOOGLE_TRENDS_CONCURRENCY=1          # Solo 1 request simultáneo
+```
 
 ### 3. Asegurarse de que PostgreSQL y Redis estén corriendo
 
@@ -42,7 +68,7 @@ Ajusta las variables en `.env` si es necesario.
 # Verificar PostgreSQL
 sudo systemctl status postgresql
 
-# Verificar Redis
+# Verificar Redis (CRÍTICO para fallback stale)
 sudo systemctl status redis-server
 
 # Si no están corriendo, iniciarlos
@@ -104,21 +130,28 @@ POST /v1/trends/query
 Content-Type: application/json
 
 {
-  "keyword": "scooter",
+  "keyword": "bitcoin",
   "country": "MX",
-  "window_days": 90,
-  "baseline_days": 365
+  "window_days": 30,
+  "baseline_days": 1795
 }
 ```
+
+**Parámetros:**
+- `keyword` (string, 2-60 chars): Palabra clave a analizar
+- `country` (string): `MX`, `CR`, o `ES`
+- `window_days` (number): 7, 30, 90, o 365 días de ventana de análisis
+- `baseline_days` (number): 30-1825 días de histórico (máximo 5 años)
+  - ⚠️ **Límite total**: `window_days + baseline_days ≤ 1825` (5 años)
 
 **Response:**
 ```json
 {
-  "keyword": "scooter",
+  "keyword": "bitcoin",
   "country": "MX",
-  "window_days": 90,
-  "baseline_days": 365,
-  "generated_at": "2026-01-10T12:00:00Z",
+  "window_days": 30,
+  "baseline_days": 1795,
+  "generated_at": "2026-01-11T12:00:00Z",
   "sources_used": ["google_trends"],
   "trend_score": 72.6,
   "signals": {
@@ -127,8 +160,11 @@ Content-Type: application/json
     "recent_peak_30d": 0.92
   },
   "series": [
-    { "date": "2025-10-15", "value": 21 },
-    { "date": "2025-10-16", "value": 19 }
+    { "date": "2021-02-07", "value": 21 },  // ← 5 años atrás
+    { "date": "2021-02-14", "value": 19 },
+    // ... ~260 semanas de datos ...
+    { "date": "2026-01-04", "value": 45 },
+    { "date": "2026-01-11", "value": 42 }
   ],
   "by_country": [
     { "country": "MX", "value": 100 },
@@ -143,11 +179,15 @@ Content-Type: application/json
   ],
   "cache": {
     "hit": false,
-    "ttl_seconds": 21600
+    "ttl_seconds": 86400  // 24 horas
   },
   "request_id": "550e8400-e29b-41d4-a716-446655440000"
 }
 ```
+
+**Granularidad de datos (automática por Google Trends):**
+- 1-90 días: Datos diarios
+- 91-1825 días: Datos semanales (~260 puntos para 5 años)
 
 ### Listar Países Soportados
 
@@ -169,43 +209,113 @@ GET /v1/countries
 
 ## 🧪 Ejemplos de Uso
 
-### Con curl
+### Análisis de 1 Año (Default)
 
 ```bash
-# Consultar tendencia de "scooter" en México
+# Análisis estándar: últimos 30 días vs 1 año de histórico
 curl -X POST http://localhost:3000/v1/trends/query \
   -H "Content-Type: application/json" \
   -d '{
-    "keyword": "scooter",
+    "keyword": "bitcoin",
     "country": "MX",
-    "window_days": 90,
+    "window_days": 30,
     "baseline_days": 365
   }'
+```
 
+### Análisis de 5 Años (Máximo - Para Predicción)
+
+```bash
+# Análisis profundo: últimos 30 días vs 5 años de histórico
+# Ideal para detectar estacionalidad y predecir patrones
+curl -X POST http://localhost:3000/v1/trends/query \
+  -H "Content-Type: application/json" \
+  -d '{
+    "keyword": "viva mexico",
+    "country": "MX",
+    "window_days": 30,
+    "baseline_days": 1795
+  }' | jq '{
+    keyword,
+    trend_score,
+    series_length: (.series | length),
+    first_date: .series[0].date,
+    last_date: .series[-1].date,
+    by_country
+  }'
+
+# Response esperado:
+# {
+#   "keyword": "viva mexico",
+#   "trend_score": 35.03,
+#   "series_length": 261,      # ~5 años en semanas
+#   "first_date": "2021-02-07", # Inicio: Feb 2021
+#   "last_date": "2026-01-11",  # Fin: Hoy
+#   "by_country": [
+#     { "country": "MX", "value": 100 },
+#     { "country": "CR", "value": 8 },
+#     { "country": "ES", "value": 3 }
+#   ]
+# }
+```
+
+### Análisis Rápido (7 Días vs 30 Días)
+
+```bash
+# Análisis de corto plazo
+curl -X POST http://localhost:3000/v1/trends/query \
+  -H "Content-Type": application/json" \
+  -d '{
+    "keyword": "mundial futbol",
+    "country": "CR",
+    "window_days": 7,
+    "baseline_days": 30
+  }'
+```
+
+### Scripts de Utilidad
+
+```bash
 # Ver países soportados
 curl http://localhost:3000/v1/countries
 
 # Health check
 curl http://localhost:3000/health
+
+# Limpiar cache (útil después de actualizaciones)
+npm run cache:clear
+
+# Ver keys en cache
+npm run cache:keys
 ```
 
 ### Con JavaScript/Fetch
 
 ```javascript
+// Análisis de 5 años para machine learning
 const response = await fetch('http://localhost:3000/v1/trends/query', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
-    keyword: 'scooter',
+    keyword: 'bitcoin',
     country: 'MX',
-    window_days: 90,
-    baseline_days: 365
+    window_days: 30,
+    baseline_days: 1795  // 5 años
   })
 });
 
 const data = await response.json();
+
 console.log(`Trend Score: ${data.trend_score}`);
+console.log(`Historical data points: ${data.series.length}`);
+console.log(`Date range: ${data.series[0].date} to ${data.series[data.series.length-1].date}`);
 console.log(`Explanations:`, data.explain);
+
+// Usar series para análisis predictivo
+const series = data.series.map(p => ({
+  date: new Date(p.date),
+  value: p.value
+}));
 ```
 
 ## 📊 Modelo de Scoring
@@ -294,6 +404,15 @@ npm run db:generate     # Generar cliente Prisma
 npm run db:migrate      # Ejecutar migraciones
 npm run db:studio       # Abrir Prisma Studio (GUI)
 npm run db:reset        # Reset completo de DB
+
+# Cache Redis
+npm run cache:clear     # Limpiar todo el cache
+npm run cache:keys      # Ver primeras 20 keys en cache
+
+# Tests
+npm test                # Ejecutar todos los tests (138 tests)
+npm run test:watch      # Tests en modo watch
+npm run test:coverage   # Tests con coverage report
 ```
 
 ## 🔒 Validación y Rate Limiting
@@ -303,7 +422,8 @@ npm run db:reset        # Reset completo de DB
 - **keyword**: 2-60 caracteres
 - **country**: Código ISO 3166-1 alpha-2 (MX, CR, ES)
 - **window_days**: Solo valores permitidos: 7, 30, 90, 365
-- **baseline_days**: Máximo 730 días (2 años), debe ser ≥ window_days
+- **baseline_days**: 30-1825 días (hasta 5 años)
+- **Límite total**: `window_days + baseline_days ≤ 1825` (5 años máximo)
 
 ### Rate Limiting
 
@@ -337,9 +457,17 @@ Abre en `http://localhost:5555`
 ### Verificar cache Redis
 
 ```bash
-docker exec -it trends-redis redis-cli
-> KEYS trend:*
-> GET "trend:scooter:MX:90:365"
+# Ver keys en cache
+npm run cache:keys
+
+# O directamente con redis-cli
+redis-cli
+> KEYS trend:v4:*
+> GET "trend:v4:bitcoin:MX:30:365"
+> TTL "trend:v4:bitcoin:MX:30:365"
+
+# Limpiar cache
+npm run cache:clear
 ```
 
 ## ⚠️ Manejo de Errores
@@ -380,9 +508,11 @@ La API devuelve errores consistentes:
 
 ### Cache Strategy
 
-- **Key format**: `trend:{keyword}:{country}:{window}:{baseline}`
-- **TTL**: 6-24 horas (configurable)
+- **Key format**: `trend:v4:{keyword}:{country}:{window}:{baseline}` (con versioning)
+- **TTL**: 24 horas (86400s)
+- **Stale TTL**: 48 horas (172800s) para fallback
 - **Cache miss**: Fetch from Google Trends → Score → Persist → Cache → Return
+- **Versioning**: v4 previene conflictos en actualizaciones
 
 ### Database
 
@@ -392,11 +522,13 @@ La API devuelve errores consistentes:
 
 ### Google Trends Connector
 
-- **Max retries**: 3 (configurable)
-- **Retry delay**: 2 segundos con backoff
-- **Retryable errors**: ECONNRESET, ETIMEDOUT, 429, 503, 504
-- **Parallel fetches**: Time series + Country comparison simultáneo
+- **Max retries**: 3 intentos con exponential backoff (5s → 10s → 20s)
+- **Request delay**: 4 segundos entre requests
+- **Concurrency**: Solo 1 request simultáneo (lock con cola)
+- **Retryable errors**: ECONNRESET, ETIMEDOUT, 429, 503, 504, HTML responses
+- **Country comparison**: Single global query filtrado para MX, CR, ES (evita rate limiting)
 - **Supported countries**: México (MX), Costa Rica (CR), España (ES)
+- **Historical limit**: Hasta 1825 días (5 años) de datos históricos
 
 ## 📄 Licencia
 

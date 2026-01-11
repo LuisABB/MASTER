@@ -34,12 +34,18 @@ export const trendQuerySchema = z.object({
     .number()
     .int()
     .positive()
-    .max(730, 'baseline_days must be at most 730 (2 years)')
+    .max(1825, 'baseline_days must be at most 1825 days (5 years)')
     .default(365)
 }).refine(
   (data) => data.baseline_days >= data.window_days,
   {
     message: 'baseline_days must be greater than or equal to window_days',
+    path: ['baseline_days']
+  }
+).refine(
+  (data) => (data.window_days + data.baseline_days) <= 1825,
+  {
+    message: 'Total period (window_days + baseline_days) cannot exceed 1825 days (5 years)',
     path: ['baseline_days']
   }
 );
