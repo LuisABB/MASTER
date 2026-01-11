@@ -1,0 +1,83 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model TrendQuery {
+  id           String    @id @default(uuid())
+  keyword      String
+  region       String
+  windowDays   Int       @map("window_days")
+  baselineDays Int       @map("baseline_days")
+  status       QueryStatus @default(RUNNING)
+  createdAt    DateTime  @default(now()) @map("created_at")
+  finishedAt   DateTime? @map("finished_at")
+  errorMessage String?   @map("error_message") @db.Text
+
+  // Relations
+  result       TrendResult?
+  series       TrendSeriesPoint[]
+  byRegion     TrendByRegion[]
+
+  @@index([keyword, region, windowDays, baselineDays], name: "idx_query_cache_lookup")
+  @@index([createdAt], name: "idx_created_at")
+  @@index([status], name: "idx_status")
+  @@map("trend_queries")
+}
+
+model TrendResult {
+  id           String   @id @default(uuid())
+  queryId      String   @unique @map("query_id")
+  trendScore   Float    @map("trend_score")
+  signals      Json     // { growth_7_vs_30, slope_14d, recent_peak_30d }
+  explain      Json     // Array of explanation strings
+  sourcesUsed  String[] @map("sources_used")
+  generatedAt  DateTime @default(now()) @map("generated_at")
+
+  // Relations
+  query        TrendQuery @relation(fields: [queryId], references: [id], onDelete: Cascade)
+
+  @@index([queryId], name: "idx_result_query")
+  @@map("trend_results")
+}
+
+model TrendSeriesPoint {
+  id       BigInt     @id @default(autoincrement())
+  queryId  String     @map("query_id")
+  date     DateTime   @db.Date
+  value    Int
+
+  // Relations
+  query    TrendQuery @relation(fields: [queryId], references: [id], onDelete: Cascade)
+
+  @@index([queryId], name: "idx_series_query")
+  @@index([date], name: "idx_series_date")
+  @@map("trend_series")
+}
+
+model TrendByRegion {
+  id       BigInt     @id @default(autoincrement())
+  queryId  String     @map("query_id")
+  region   String
+  value    Int
+
+  // Relations
+  query    TrendQuery @relation(fields: [queryId], references: [id], onDelete: Cascade)
+
+  @@index([queryId], name: "idx_by_region_query")
+  @@index([region], name: "idx_by_region")
+  @@map("trend_by_region")
+}
+
+enum QueryStatus {
+  RUNNING
+  DONE
+  ERROR
+}
