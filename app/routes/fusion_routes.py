@@ -10,6 +10,10 @@ from app.services.trend_engine_service import trend_engine_service
 from app.connectors.youtube_connector import youtube_connector
 from app.services.youtube_intent_service import youtube_intent_service
 from app.connectors.aliexpress_connector import aliexpress_connector
+from app.services.aliexpress_category_map import (
+    update_category_map_from_competitors,
+    enrich_competitors
+)
 
 fusion_bp = Blueprint('fusion', __name__)
 
@@ -126,6 +130,10 @@ def fusion_query():
                 page_no=ae_page,
                 page_size=ae_page_size
             )
+            competitors = aliexpress_result.get('competitors', [])
+            if competitors:
+                category_map = update_category_map_from_competitors(competitors)
+                aliexpress_result['competitors'] = enrich_competitors(competitors, category_map)
         except Exception as ae_error:
             logger.warning(f'AliExpress fetch failed, continuing without it: {ae_error}', request_id=request_id)
             aliexpress_result = {
@@ -374,6 +382,11 @@ def _save_separate_csvs(response: dict, trends_result: dict, youtube_result: dic
                 'shop_url',
                 'promotion_link',
                 'category_id',
+                'category_name',
+                'category_path',
+                'macro_category',
+                'macro_path',
+                'category_resolution_confidence',
                 'first_level_category_id',
                 'sell_score'
             ])
@@ -399,6 +412,11 @@ def _save_separate_csvs(response: dict, trends_result: dict, youtube_result: dic
                     item.get('shop_url', ''),
                     item.get('promotion_link', ''),
                     item.get('category_id', ''),
+                    item.get('category_name', ''),
+                    item.get('category_path', ''),
+                    item.get('macro_category', ''),
+                    item.get('macro_path', ''),
+                    item.get('category_resolution_confidence', ''),
                     item.get('first_level_category_id', ''),
                     item.get('sell_score', '')
                 ])

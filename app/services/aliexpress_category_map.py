@@ -17,6 +17,8 @@ RESCRAPE_INTERVAL = timedelta(days=1)
 CATEGORY_RESOLUTION_MODE = os.getenv('CATEGORY_RESOLUTION_MODE', 'none').strip().lower()
 
 _API_AVAILABLE: Optional[bool] = None
+_CATEGORY_TREE_CACHE: Dict[str, Any] = {"loaded_at": None, "by_id": None}
+_CATEGORY_TREE_TTL_SECONDS = 6 * 60 * 60
 
 MACRO_TAXONOMY: List[Tuple[str, List[str]]] = [
     ('Electrónica > Cargadores', ['cargador', 'charger', 'charge', 'usb', 'pd', 'fast charge']),
@@ -96,6 +98,14 @@ def _parse_iso(value: Optional[str]) -> Optional[datetime]:
         return None
 
 
+def _now_ts() -> float:
+    return datetime.utcnow().timestamp()
+
+
+def _normalize_cid(cid: Any) -> str:
+    return str(cid).strip()
+
+
 def _should_update(entry: Dict[str, Any]) -> bool:
     confidence = entry.get('confidence')
     if confidence == 'api_verified':
@@ -113,43 +123,97 @@ def _mark_api_unavailable(reason: str) -> None:
 
 
 def resolve_category_api(category_id: str) -> Optional[Tuple[str, str]]:
-    global _API_AVAILABLE
-    if _API_AVAILABLE is False:
+    def _load_category_tree_from_api() -> Optional[Dict[str, Dict[str, Any]]]:
+        global _API_AVAILABLE
+
+        if _API_AVAILABLE is False:
+            return None
+
+        loaded_at = _CATEGORY_TREE_CACHE["loaded_at"]
+        by_id = _CATEGORY_TREE_CACHE["by_id"]
+        if loaded_at and by_id and (_now_ts() - loaded_at) < _CATEGORY_TREE_TTL_SECONDS:
+            return by_id
+
+        try:
+            resp = aliexpress_connector._call_api(
+                'aliexpress.affiliate.category.get',
+                {}
+            )
+            _API_AVAILABLE = True
+        except Exception as error:
+            msg = str(error)
+            if any(k in msg.lower() for k in ['invalid method', 'method not found', 'no permission', 'unauthorized']):
+                _mark_api_unavailable(msg)
+            return None
+
+        if not isinstance(resp, dict):
+            return None
+
+        node: Any = resp
+        for key in [
+            'aliexpress_affiliate_category_get_response',
+            'resp_result',
+            'result',
+            'categories',
+            'category'
+        ]:
+            if isinstance(node, dict) and key in node:
+                node = node[key]
+            else:
+                node = None
+                break
+
+        if not isinstance(node, list):
+            return None
+
+        by_id = {}
+        for c in node:
+            if not isinstance(c, dict):
+                continue
+            cid = c.get('category_id')
+            name = c.get('category_name')
+            parent = c.get('parent_category_id')
+            if cid is None or not name:
+                continue
+            by_id[_normalize_cid(cid)] = {
+                'name': str(name),
+                'parent': _normalize_cid(parent) if parent is not None else None
+            }
+
+        _CATEGORY_TREE_CACHE["loaded_at"] = _now_ts()
+        _CATEGORY_TREE_CACHE["by_id"] = by_id
+        return by_id
+
+    def _build_category_path(cid: str, by_id: Dict[str, Dict[str, Any]], max_depth: int = 10) -> Optional[str]:
+        parts: List[str] = []
+        cur = cid
+        depth = 0
+        while cur and depth < max_depth:
+            node = by_id.get(cur)
+            if not node:
+                break
+            parts.append(node['name'])
+            cur = node.get('parent')
+            depth += 1
+
+        if not parts:
+            return None
+
+        parts.reverse()
+        return ' > '.join(parts)
+
+    cid = _normalize_cid(category_id)
+    by_id = _load_category_tree_from_api()
+    if not by_id:
         return None
 
-    try:
-        response = aliexpress_connector._call_api(
-            'aliexpress.affiliate.category.get',
-            {'category_id': category_id}
-        )
-        _API_AVAILABLE = True
-    except Exception as error:
-        msg = str(error)
-        if any(k in msg.lower() for k in ['invalid method', 'method not found', 'no permission', 'unauthorized']):
-            _mark_api_unavailable(msg)
+    node = by_id.get(cid)
+    if not node:
         return None
 
-    if not isinstance(response, dict):
-        return None
-
-    def find_name_path(obj: Any) -> Optional[Tuple[str, str]]:
-        if isinstance(obj, dict):
-            name = obj.get('category_name') or obj.get('name')
-            path = obj.get('category_path') or obj.get('path')
-            if name and path:
-                return str(name), str(path)
-            for val in obj.values():
-                found = find_name_path(val)
-                if found:
-                    return found
-        elif isinstance(obj, list):
-            for item in obj:
-                found = find_name_path(item)
-                if found:
-                    return found
-        return None
-
-    return find_name_path(response)
+    name = node['name']
+    path = _build_category_path(cid, by_id) or name
+    return name, path
 
 
 def update_category_map_from_competitors(competitors: List[Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
@@ -159,7 +223,11 @@ def update_category_map_from_competitors(competitors: List[Dict[str, Any]]) -> D
     if mode not in {'none', 'api', 'hybrid'}:
         mode = 'none'
 
-    unique_ids = extract_unique_category_ids(competitors)
+    unique_ids = [
+        str(x).strip()
+        for x in extract_unique_category_ids(competitors)
+        if str(x).strip()
+    ]
     missing: List[str] = []
 
     for cid in unique_ids:
@@ -183,8 +251,8 @@ def update_category_map_from_competitors(competitors: List[Dict[str, Any]]) -> D
                 name, path = api_result
                 category_map[cid] = {
                     'labels': tokens[:10],
-                    'macro_category': name,
-                    'macro_path': path,
+                    'macro_category': name or '',
+                    'macro_path': path or name or '',
                     'updated_at': datetime.utcnow().isoformat(),
                     'confidence': 'api_verified'
                 }
