@@ -36,6 +36,7 @@ Copiar `.env.example` a `.env` y ajustar valores:
 - `ALIEXPRESS_APP_KEY` - AppKey de AliExpress Affiliate API
 - `ALIEXPRESS_APP_SECRET` - App Secret de AliExpress Affiliate API
 - `ALIEXPRESS_TRACKING_ID` - Tracking ID (opcional)
+- `CATEGORY_RESOLUTION_MODE` - `none|api|hybrid` (default: `none`). `api` usa `affiliate.category.get` para `category_name/path`.
 
 ### 4. Iniciar Redis
 
@@ -100,15 +101,18 @@ NODE_ENV=test pytest --cov=app --cov-report=html
 - `POST /v1/insights/fusion/query` - Combined insights from Google Trends + YouTube + AliExpress
   ```json
   {
-  "keyword": "zapatillas",
-  "country": "MX",
-  "window_days": 30,
-  "baseline_days": 365,
-  "lang": "es",
-  "maxResults": 25,
-  "target_currency": "MXN",
-  "page": 1,
-  "page_size": 10
+    "keyword": "zapatillas",
+    "country": "CR",
+    "region": "CR",
+    "window_days": 30,
+    "baseline_days": 365,
+    "lang": "es",
+    "maxResults": 25,
+    "ship_to_country": "MX",
+    "target_currency": "MXN",
+    "target_language": "ES",
+    "page": 1,
+    "page_size": 10
   }
   ```
 
@@ -158,9 +162,10 @@ master/
 │   ├── utils/               # Utilities (logger, dates, redis)
 │   └── middleware/          # Middleware
 ├── results/                 # Generated CSV files
-│   ├── trends_data_YYYYmmdd_HHMMSS.csv
-│   ├── youtube_data_YYYYmmdd_HHMMSS.csv
-│   └── aliexpress_data_YYYYmmdd_HHMMSS.csv
+│   ├── trends_data.csv
+│   ├── youtube_data.csv
+│   ├── fusion_data.csv
+│   └── aliexpress_data.csv
 ├── tests/                   # Pytest tests
 ├── server.py                # Entry point
 ├── requirements.txt         # Python dependencies
@@ -173,10 +178,14 @@ master/
 - La configuración anti-bloqueo de Google Trends está implementada
 - **No usa base de datos** - todos los resultados se cachean en Redis
 - Redis se usa para caché con TTL de 24 horas
-- **Genera CSV automáticamente** (timestamp por request):
-  - `results/trends_data_YYYYmmdd_HHMMSS.csv` - Datos de Google Trends
-  - `results/youtube_data_YYYYmmdd_HHMMSS.csv` - Datos de YouTube
-  - `results/aliexpress_data_YYYYmmdd_HHMMSS.csv` - Datos de AliExpress Affiliate
+- **Genera CSV automáticamente**:
+  - `results/trends_data.csv` - Datos de Google Trends
+  - `results/youtube_data.csv` - Datos de YouTube
+  - `results/fusion_data.csv` - Datos combinados con score de fusión (incluye AliExpress)
+  - `results/aliexpress_data.csv` - Datos de AliExpress Affiliate
+
+Notas de AliExpress CSV:
+- Incluye `category_name`, `category_path`, `macro_category`, `macro_path` y `category_resolution_confidence` cuando `CATEGORY_RESOLUTION_MODE=api`.
 
 ## 🧾 CSVs generados (Fusion)
 
@@ -237,6 +246,11 @@ Columnas:
 - `shop_url`: URL de la tienda
 - `promotion_link`: link de promoción
 - `category_id`: categoría
+- `category_name`: nombre de categoría (API)
+- `category_path`: ruta completa (API)
+- `macro_category`: alias de categoría (igual a `category_name` en modo `api`)
+- `macro_path`: alias de ruta (igual a `category_path` en modo `api`)
+- `category_resolution_confidence`: `api_verified|inferred|unknown`
 - `first_level_category_id`: categoría principal
 - `sell_score`: score de ventas
 
@@ -249,16 +263,6 @@ Columnas:
 - [YouTube Data API v3](https://developers.google.com/youtube/v3)
 
 ## 📋 Changelog
-
-### v2.1.0 (2026-02-21)
-
-**Breaking Changes:**
-- ✅ `region` ya no se recibe en Fusion (YouTube usa `country`)
-- ✅ `ship_to_country` ya no se recibe en Fusion (AliExpress usa `country`)
-
-**Mejoras:**
-- ✨ CSVs de Fusion ahora son 3 archivos separados con timestamp
-- ✨ `target_language` se unifica con `lang` en Fusion
 
 ### v2.0.0 (2026-01-31)
 
@@ -274,7 +278,11 @@ Columnas:
   - `engagement_rate` = (likes + 2*comments) / views
   - `freshness` = exp(-days / half_life)
   - `video_intent` = log10(views+1) * engagement * freshness
-- ✨ Generación automática de CSVs (versión anterior)
+- ✨ Generación automática de 3 archivos CSV:
+  - `results/trends_data.csv` - Datos de Google Trends
+  - `results/youtube_data.csv` - Datos de YouTube con métricas
+  - `results/fusion_data.csv` - Fusión ponderada (70% Trends + 30% YouTube)
+- ✨ CSV en modo append - acumulación de datos entre requests
 
 **Mejoras:**
 - 🔧 Anti-bloqueo Google Trends mejorado:

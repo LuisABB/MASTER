@@ -1,75 +1,39 @@
 {
   "15": {
     "labels": [
-      "nuevo",
-      "telescopio",
-      "monocular",
-      "mini",
-      "telescopio",
-      "portátil",
-      "teléfono",
-      "móvil",
-      "soporte",
-      "camping"
+      "collar",
+      "entrenamiento",
+      "eléctrico",
+      "perros",
+      "collar",
+      "impermeable",
+      "corteza",
+      "perro",
+      "mascota",
+      "control"
     ],
-    "macro_category": "Óptica/Telescopios",
-    "macro_path": "Outdoor > Óptica/Telescopios",
-    "updated_at": "2026-02-21T15:48:12.098393",
-    "confidence": "inferred"
-  },
-  "202192403": {
-    "labels": [
-      "uds",
-      "protector",
-      "pantalla",
-      "cristal",
-      "funda",
-      "teléfono",
-      "iphone",
-      "pro",
-      "max",
-      "mini"
-    ],
-    "macro_category": "Fundas/Protección",
-    "macro_path": "Telefonía > Fundas/Protección",
-    "updated_at": "2026-02-21T15:48:12.098486",
-    "confidence": "inferred"
-  },
-  "18": {
-    "labels": [
-      "telescopio",
-      "monocular",
-      "2000x25",
-      "mini",
-      "telescopio",
-      "portátil",
-      "teléfono",
-      "móvil",
-      "soporte",
-      "acampar"
-    ],
-    "macro_category": "Óptica/Telescopios",
-    "macro_path": "Outdoor > Óptica/Telescopios",
-    "updated_at": "2026-02-21T15:48:12.098552",
-    "confidence": "inferred"
+    "macro_category": "Home & Garden",
+    "macro_path": "Home & Garden",
+    "updated_at": "2026-02-21T18:19:54.403874",
+    "confidence": "api_verified"
   },
   "44": {
     "labels": [
-      "adaptador",
-      "pared",
-      "usb",
-      "tipo",
-      "puertos",
-      "120",
-      "carga",
-      "rápida",
-      "teléfonos",
-      "móviles"
+      "llavero",
+      "antipérdida",
+      "resistente",
+      "agua",
+      "funda",
+      "tpu",
+      "apple",
+      "airtag",
+      "air",
+      "tag"
     ],
-    "macro_category": "Cargadores",
-    "macro_path": "Electrónica > Cargadores",
-    "updated_at": "2026-02-21T15:48:12.098608",
-    "confidence": "inferred"
+    "macro_category": "Consumer Electronics",
+    "macro_path": "Consumer Electronics",
+    "updated_at": "2026-02-21T18:19:54.403998",
+    "confidence": "api_verified"
   },
   "36": {
     "labels": [
@@ -84,9 +48,117 @@
       "mascotas",
       "colgante"
     ],
-    "macro_category": null,
-    "macro_path": null,
-    "updated_at": "2026-02-21T15:52:21.226669",
-    "confidence": "unknown"
+    "macro_category": "Jewelry & Accessories",
+    "macro_path": "Jewelry & Accessories",
+    "updated_at": "2026-02-21T18:19:54.404071",
+    "confidence": "api_verified"
+  },
+  "18": {
+    "labels": [
+      "paracord",
+      "núcleos",
+      "650lb",
+      "31m",
+      "diámetro",
+      "4mm",
+      "cuerda",
+      "paracaídas",
+      "supervivencia",
+      "táctica"
+    ],
+    "macro_category": "Sports & Entertainment",
+    "macro_path": "Sports & Entertainment",
+    "updated_at": "2026-02-21T18:19:54.404145",
+    "confidence": "api_verified"
+  },
+  "200574005": {
+    "labels": [
+      "calcetines",
+      "antideslizantes",
+      "invierno",
+      "muy",
+      "cálidas",
+      "mujer",
+      "hombre",
+      "calcetines",
+      "nieve",
+      "alfombra"
+    ],
+    "macro_category": "Underwear",
+    "macro_path": "Underwear",
+    "updated_at": "2026-02-21T18:21:55.199889",
+    "confidence": "api_verified"
+  },
+  "1501": {
+    "labels": [
+      "calcetines",
+      "tobilleros",
+      "corte",
+      "bajo",
+      "hombre",
+      "mujer",
+      "medias",
+      "informales",
+      "finas",
+      "transpirables"
+    ],
+    "macro_category": "Mother & Kids",
+    "macro_path": "Mother & Kids",
+    "updated_at": "2026-02-21T18:21:55.200024",
+    "confidence": "api_verified"
+  },
+  "201768104": {
+    "labels": [
+      "par",
+      "lote",
+      "calcetines",
+      "compresión",
+      "hombre",
+      "medias",
+      "transpirables",
+      "baloncesto",
+      "deportes",
+      "ciclismo"
+    ],
+    "macro_category": "Sports Shoes,Clothing&Accessories",
+    "macro_path": "Sports Shoes,Clothing&Accessories",
+    "updated_at": "2026-02-21T18:21:55.200141",
+    "confidence": "api_verified"
+  },
+  "34": {
+    "labels": [
+      "juego",
+      "clavos",
+      "goma",
+      "reparación",
+      "neumáticos",
+      "coche",
+      "herramienta",
+      "universal",
+      "reparación",
+      "neumáticos"
+    ],
+    "macro_category": "Automobiles, Parts & Accessories",
+    "macro_path": "Automobiles, Parts & Accessories",
+    "updated_at": "2026-02-21T18:33:25.352642",
+    "confidence": "api_verified"
+  },
+  "201355758": {
+    "labels": [
+      "cubierta",
+      "impermeable",
+      "motocicleta",
+      "cubierta",
+      "lluvia",
+      "prueba",
+      "polvo",
+      "protección",
+      "exteriores",
+      "interiores"
+    ],
+    "macro_category": "Motorcycle Equipments & Parts",
+    "macro_path": "Motorcycle Equipments & Parts",
+    "updated_at": "2026-02-21T18:33:25.352667",
+    "confidence": "api_verified"
   }
 }
