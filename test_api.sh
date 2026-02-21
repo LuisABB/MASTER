@@ -35,8 +35,8 @@ curl -s -X POST "$BASE_URL/dev/mock-trends" \
 echo ""
 
 # Test 5: Real trends query (with mocks in test mode)
-echo "5️⃣  Testing real trends query endpoint..."
-curl -s -X POST "$BASE_URL/v1/trends/query" \
+echo "5️⃣  Testing real trends query endpoint (may take 15-20s)..."
+curl -s --max-time 60 -X POST "$BASE_URL/v1/trends/query" \
   -H "Content-Type: application/json" \
   -d '{
     "keyword": "python",

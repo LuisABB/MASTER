@@ -61,12 +61,15 @@ def clear_cache():
     Clear Redis cache (all keys or specific pattern).
     
     POST /dev/clear-cache
-    Body: {
+    Body (optional): {
         "pattern": "trend:*"  // Optional: clear specific pattern, default: all trend keys
     }
     """
     try:
-        pattern = request.json.get('pattern', 'trend:*') if request.json else 'trend:*'
+        # Handle both JSON and no-body requests
+        pattern = 'trend:*'
+        if request.is_json and request.json:
+            pattern = request.json.get('pattern', 'trend:*')
         
         # Get all matching keys
         keys = redis_client.client.keys(pattern)

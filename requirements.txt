@@ -2,10 +2,8 @@
 Flask==3.0.0
 Flask-CORS==4.0.0
 
-# Database
-SQLAlchemy==2.0.25
-psycopg2-binary==2.9.9
-alembic==1.13.1
+# HTTP Requests
+requests==2.31.0
 
 # Redis Cache
 redis==5.0.1

@@ -53,6 +53,9 @@ def create_app(config_name='development'):
                 'health': '/health',
                 'trends': '/v1/trends/query',
                 'countries': '/v1/regions',
+                'youtube': '/v1/sources/youtube/query',
+                'fusion': '/v1/insights/fusion/query',
+                'aliexpress_search': '/aliexpress/search',
                 'dev_mock': '/dev/mock-trends'
             }
         })
@@ -98,22 +101,20 @@ def create_app(config_name='development'):
     # Initialize connections
     with app.app_context():
         redis_client.connect()
-        
-        # Initialize database (create tables if needed)
-        try:
-            from app.db import init_db
-            init_db()
-            logger.info('✅ Database initialized successfully')
-        except Exception as error:
-            logger.warning(f'⚠️  Database initialization skipped: {error}')
     
     # Register blueprints
     from app.routes.trends_routes import trends_bp
     from app.routes.countries_routes import countries_bp
     from app.routes.dev_routes import dev_bp
+    from app.routes.youtube_routes import youtube_bp
+    from app.routes.fusion_routes import fusion_bp
+    from app.routes.aliexpress_routes import aliexpress_bp
     
     app.register_blueprint(trends_bp, url_prefix='/v1/trends')
     app.register_blueprint(countries_bp, url_prefix='/v1')
+    app.register_blueprint(youtube_bp, url_prefix='/v1/sources/youtube')
+    app.register_blueprint(fusion_bp, url_prefix='/v1/insights/fusion')
+    app.register_blueprint(aliexpress_bp, url_prefix='')
     
     if app.config['ENV'] == 'development':
         app.register_blueprint(dev_bp, url_prefix='/dev')

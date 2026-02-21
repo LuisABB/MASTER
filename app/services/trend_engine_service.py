@@ -1,5 +1,6 @@
 """Trend Engine Service - Orchestrates trend analysis workflow."""
-import uuid
+import csv
+import os
 from datetime import datetime
 from typing import Dict, Optional
 from loguru import logger
@@ -7,8 +8,6 @@ from loguru import logger
 from app.connectors import google_trends_connector
 from app.services.scoring_service import scoring_service
 from app.utils.redis_client import redis_client
-from app.db import db_session
-from app.models import TrendQuery, QueryStatus
 from app.config import Config
 
 
@@ -27,12 +26,10 @@ class TrendEngineService:
     
     Flow:
     1. Check cache
-    2. Create DB query record
-    3. Fetch from Google Trends
-    4. Calculate score
-    5. Persist to DB
-    6. Cache result
-    7. Return response
+    2. Fetch from Google Trends
+    3. Calculate score
+    4. Cache result
+    5. Return response
     
     Fallback: If API fails, try to return stale cached data
     """
@@ -43,10 +40,11 @@ class TrendEngineService:
         country: str,
         window_days: int,
         baseline_days: int,
-        request_id: str
+        request_id: str,
+        save_csv: bool = True
     ) -> Dict:
         """
-        Execute trend query with caching and persistence.
+        Execute trend query with caching.
         
         Args:
             keyword: Search keyword
@@ -54,6 +52,7 @@ class TrendEngineService:
             window_days: Recent window for analysis
             baseline_days: Historical baseline period
             request_id: Request ID for tracking
+            save_csv: Whether to save results to CSV (default: True)
             
         Returns:
             Dictionary with trend analysis results
@@ -77,18 +76,19 @@ class TrendEngineService:
         if cached_result:
             logger.info(f'Cache hit', request_id=request_id, cache_key=cache_key)
             ttl = redis_client.get_ttl(cache_key)
-            return {
+            response = {
                 **cached_result,
                 'cache': {
                     'hit': True,
                     'ttl_seconds': ttl
                 }
             }
+            # Save to CSV if requested
+            if save_csv:
+                self._save_to_csv(response)
+            return response
         
         logger.info(f'Cache miss - fetching fresh data', request_id=request_id, cache_key=cache_key)
-        
-        # Create query record in DB
-        query = self._create_query_record(keyword, country, window_days, baseline_days)
         
         try:
             # Fetch data from Google Trends
@@ -107,12 +107,6 @@ class TrendEngineService:
                 window_days,
                 baseline_days
             )
-            
-            # Persist results to database (non-blocking, errors logged but not thrown)
-            self._persist_results(query.id, trends_data, scoring)
-            
-            # Update query status
-            self._update_query_status(query.id, QueryStatus.COMPLETED)
             
             # Build response
             response = {
@@ -137,6 +131,10 @@ class TrendEngineService:
             # Cache the result
             redis_client.set(cache_key, response)
             
+            # Save to CSV if requested
+            if save_csv:
+                self._save_to_csv(response)
+            
             logger.info(
                 f'Trend query completed successfully',
                 request_id=request_id,
@@ -148,9 +146,6 @@ class TrendEngineService:
             return response
             
         except Exception as error:
-            # Update query status to error
-            self._update_query_status(query.id, QueryStatus.FAILED, str(error))
-            
             logger.error(
                 f'Trend query failed - attempting stale cache fallback',
                 request_id=request_id,
@@ -211,104 +206,68 @@ class TrendEngineService:
                 {'originalError': error_msg}
             )
     
-    def _create_query_record(
-        self,
-        keyword: str,
-        country: str,
-        window_days: int,
-        baseline_days: int
-    ) -> TrendQuery:
-        """Create initial query record in database."""
-        try:
-            with db_session() as db:
-                query = TrendQuery(
-                    id=str(uuid.uuid4()),
-                    keyword=keyword,
-                    country=country,
-                    window_days=window_days,
-                    baseline_days=baseline_days,
-                    status=QueryStatus.PROCESSING,
-                    created_at=datetime.utcnow()
-                )
-                db.add(query)
-                db.commit()
-                db.refresh(query)
-                return query
-        except Exception as error:
-            logger.error(f'Failed to create query record: {error}')
-            # Return a mock query object to allow processing to continue
-            return TrendQuery(
-                id=str(uuid.uuid4()),
-                keyword=keyword,
-                country=country,
-                window_days=window_days,
-                baseline_days=baseline_days,
-                status=QueryStatus.PROCESSING
-            )
-    
-    def _persist_results(self, query_id: str, trends_data: Dict, scoring: Dict):
+    def _save_to_csv(self, response: Dict):
         """
-        Persist results to database.
-        
-        Note: Errors are logged but not thrown - we still want to return
-        results even if DB persistence fails.
+        Save trend query results to CSV file.
+        All data in one file with complete information per row.
         """
         try:
-            with db_session() as db:
-                # For now, we only update the query status
-                # In the future, we can add TrendResult, TrendSeriesPoint, TrendByCountry models
-                logger.info(f'Results persisted successfully', query_id=query_id)
-        except Exception as error:
-            logger.error(f'Failed to persist results: {error}', query_id=query_id)
-            # Don't throw - we still want to return results
-    
-    def _update_query_status(
-        self,
-        query_id: str,
-        status: QueryStatus,
-        error_message: Optional[str] = None
-    ):
-        """
-        Update query status in database.
-        
-        Note: Errors are logged but not thrown - this is non-critical.
-        """
-        try:
-            with db_session() as db:
-                query = db.query(TrendQuery).filter(TrendQuery.id == query_id).first()
-                if query:
-                    query.status = status
-                    query.finished_at = datetime.utcnow()
-                    if error_message:
-                        query.error_message = error_message
-                    db.commit()
-        except Exception as error:
-            logger.error(
-                f'Failed to update query status: {error}',
-                query_id=query_id,
-                status=status.value if isinstance(status, QueryStatus) else status
-            )
-            # Don't throw - this is non-critical
-    
-    def get_query_history(self, limit: int = 10) -> list:
-        """
-        Get query history (optional - for future use).
-        
-        Args:
-            limit: Maximum number of records to return
+            # Create results directory if it doesn't exist
+            results_dir = 'results'
+            os.makedirs(results_dir, exist_ok=True)
             
-        Returns:
-            List of query records
-        """
-        try:
-            with db_session() as db:
-                queries = db.query(TrendQuery).order_by(
-                    TrendQuery.created_at.desc()
-                ).limit(limit).all()
-                return [q.to_dict() for q in queries]
+            # Single CSV file with all data
+            csv_file = os.path.join(results_dir, 'trends_data.csv')
+            
+            # Check if file exists
+            file_exists = os.path.exists(csv_file)
+            
+            with open(csv_file, 'a', newline='', encoding='utf-8') as f:
+                writer = csv.writer(f)
+                
+                # Write header if file is new
+                if not file_exists:
+                    writer.writerow([
+                        'timestamp',
+                        'keyword',
+                        'country',
+                        'window_days',
+                        'baseline_days',
+                        'trend_score',
+                        'source',
+                        'cache_hit',
+                        'request_id',
+                        'date',
+                        'value'
+                    ])
+                
+                # Write one row per time series data point
+                # (summary info is repeated in each row)
+                for point in response['series']:
+                    writer.writerow([
+                        response['generated_at'],
+                        response['keyword'],
+                        response['country'],
+                        response['window_days'],
+                        response['baseline_days'],
+                        response['trend_score'],
+                        response['sources_used'][0] if response['sources_used'] else 'unknown',
+                        response['cache']['hit'],
+                        response.get('request_id', 'unknown'),
+                        point['date'],
+                        point['value']
+                    ])
+            
+            logger.info(
+                f'📊 Results saved to CSV',
+                csv_file=csv_file,
+                keyword=response['keyword'],
+                rows=len(response['series'])
+            )
+            
         except Exception as error:
-            logger.error(f'Failed to fetch query history: {error}')
-            raise AppError('Database error while fetching history', 500)
+            logger.error(f'Failed to save results to CSV: {error}')
+            # Don't throw - saving CSV is non-critical
 
 
 # Singleton instance
