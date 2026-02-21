@@ -2,7 +2,7 @@
 import csv
 import os
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask import Blueprint, request, jsonify, g
 from loguru import logger
 
@@ -22,7 +22,7 @@ def youtube_query():
         "keyword": "maletas",
         "country": "MX",     // Optional, default MX
         "lang": "es",        // Optional, default es
-        "window_days": 30,   // Optional, default 30
+        "window_days": 30,   // Optional, default 30 (max 1825)
         "maxResults": 25     // Optional, default 25, max 50
     }
     
@@ -50,8 +50,9 @@ def youtube_query():
         
         country = str(data.get('country', 'MX')).upper()
         lang = str(data.get('lang', 'es')).lower()
-        window_days = min(90, max(1, int(data.get('window_days', 30))))
+        window_days = min(1825, max(1, int(data.get('window_days', 30))))
         max_results = min(50, max(1, int(data.get('maxResults', 25))))
+        order = 'viewcount'
         
         logger.info(
             f'Executing YouTube query',
@@ -67,7 +68,10 @@ def youtube_query():
             region=country,
             lang=lang,
             window_days=window_days,
-            max_results=max_results
+            max_results=max_results,
+            max_pages=1,
+            segment_days=window_days,
+            order=order
         )
         
         # Calculate intent scores
@@ -83,6 +87,8 @@ def youtube_query():
         request_id = str(uuid.uuid4())
         generated_at = datetime.utcnow().isoformat()
         
+        published_after = (datetime.utcnow() - timedelta(days=window_days)).replace(microsecond=0).isoformat() + 'Z'
+
         response = {
             'request_id': request_id,
             'generated_at': generated_at,
@@ -90,7 +96,7 @@ def youtube_query():
             'country': country,
             'lang': lang,
             'window_days': window_days,
-            'published_after': (datetime.utcnow().replace(microsecond=0).isoformat() + 'Z').replace('+00:00', ''),
+            'published_after': published_after,
             'query_used': youtube_data['query_used'],
             'videos_analyzed': result['videos_analyzed'],
             'total_views': result['total_views'],

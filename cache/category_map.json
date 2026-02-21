@@ -160,5 +160,77 @@
     "macro_path": "Motorcycle Equipments & Parts",
     "updated_at": "2026-02-21T18:33:25.352667",
     "confidence": "api_verified"
+  },
+  "26": {
+    "labels": [
+      "anillos",
+      "magnéticos",
+      "fidget",
+      "toy",
+      "set",
+      "adult",
+      "fidget",
+      "magnets",
+      "spinner",
+      "rings"
+    ],
+    "macro_category": "Toys & Hobbies",
+    "macro_path": "Toys & Hobbies",
+    "updated_at": "2026-02-21T18:38:51.899988",
+    "confidence": "api_verified"
+  },
+  "13": {
+    "labels": [
+      "uds",
+      "608zz",
+      "rodamiento",
+      "rígido",
+      "bolas",
+      "doble",
+      "escudo",
+      "monopatín",
+      "rodamientos",
+      "bolas"
+    ],
+    "macro_category": "Home Improvement",
+    "macro_path": "Home Improvement",
+    "updated_at": "2026-02-21T21:45:40.642119",
+    "confidence": "api_verified"
+  },
+  "2": {
+    "labels": [
+      "paleta",
+      "bellota",
+      "100",
+      "iberica",
+      "sobres",
+      "100g",
+      "elaboración",
+      "tradicional",
+      "ibéricos",
+      "faustino"
+    ],
+    "macro_category": "Food",
+    "macro_path": "Food",
+    "updated_at": "2026-02-21T21:58:06.795737",
+    "confidence": "api_verified"
+  },
+  "7": {
+    "labels": [
+      "kbdiy",
+      "gmk",
+      "keycap",
+      "doble",
+      "disparo",
+      "gmk",
+      "olivia",
+      "shoko",
+      "jamon",
+      "wob"
+    ],
+    "macro_category": "Computer & Office",
+    "macro_path": "Computer & Office",
+    "updated_at": "2026-02-21T21:58:06.795860",
+    "confidence": "api_verified"
   }
 }

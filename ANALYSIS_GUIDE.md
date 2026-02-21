@@ -25,8 +25,7 @@ POST /v1/trends/query
 {
   "keyword": "bitcoin",
   "country": "MX",
-  "window_days": 30,
-  "baseline_days": 365
+  "window_days": 30
 }
 ```
 
@@ -38,7 +37,6 @@ Obtienes una respuesta estructurada en **7 secciones clave**:
   "keyword": "bitcoin",
   "country": "MX",
   "window_days": 30,
-  "baseline_days": 365,
   "generated_at": "2026-01-11T05:05:00.161Z",
   "sources_used": ["mock_data"],
   
@@ -193,7 +191,7 @@ trend_score = (growth_7_vs_30 × 50%) + (slope_14d × 30%) + (recent_peak_30d ×
 ]
 ```
 
-- **Total:** `baseline_days + window_days + 1` puntos
+- **Total:** `window_days + 1` puntos (baseline igual a window)
 - **Valores:** 0-100 (interés relativo normalizado)
 - **Orden:** Cronológico ascendente
 
@@ -331,8 +329,7 @@ POST /v1/trends/query
 {
   "keyword": "inteligencia artificial",
   "country": "MX",
-  "window_days": 7,
-  "baseline_days": 30
+  "window_days": 7
 }
 ```
 
@@ -491,20 +488,17 @@ curl POST /v1/trends/query -d '{"keyword": "bitcoin"}'
 ```bash
 # Para NOTICIAS/VIRAL
 {
-  "window_days": 7,      # Última semana
-  "baseline_days": 30    # vs último mes
+  "window_days": 7       # Última semana
 }
 
 # Para SEASONAL/TENDENCIAS LARGAS
 {
-  "window_days": 30,     # Último mes
-  "baseline_days": 365   # vs último año
+  "window_days": 30      # Último mes
 }
 
 # Para ANÁLISIS HISTÓRICO
 {
-  "window_days": 90,     # Últimos 3 meses
-  "baseline_days": 730   # vs 2 años
+  "window_days": 90      # Últimos 3 meses
 }
 ```
 
@@ -649,7 +643,7 @@ A: No, son **interés relativo normalizado 0-100**. 100 = momento de máximo int
 
 1. Lee el [README.md](README.md) para setup básico
 2. Usa esta guía para interpretar resultados
-3. Experimenta con diferentes `window_days` y `baseline_days`
+3. Experimenta con diferentes `window_days` (baseline se iguala automáticamente)
 4. Crea tu propio dashboard de monitoreo
 5. Automatiza la detección de tendencias emergentes
 

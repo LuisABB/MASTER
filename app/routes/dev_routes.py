@@ -14,7 +14,6 @@ class MockTrendSchema(Schema):
     keyword = fields.Str(required=True)
     country = fields.Str(required=True, validate=validate.OneOf(['MX', 'CR', 'ES']))
     window_days = fields.Int(missing=30)
-    baseline_days = fields.Int(missing=365)
 
 
 @dev_bp.route('/mock-trends', methods=['POST'])
@@ -27,14 +26,13 @@ def mock_trends():
         "keyword": "viva mexico",
         "country": "ES",
         "window_days": 30,
-        "baseline_days": 1795
     }
     """
     try:
         schema = MockTrendSchema()
         data = schema.load(request.json or {})
         
-        total_days = data['baseline_days'] + data['window_days']
+        total_days = data['window_days']
         
         return jsonify({
             'timeSeries': generate_mock_time_series(data['keyword'], total_days),
@@ -42,7 +40,7 @@ def mock_trends():
             'keyword': data['keyword'],
             'country': data['country'],
             'window_days': data['window_days'],
-            'baseline_days': data['baseline_days'],
+            'baseline_days': data['window_days'],
             'source': 'MOCK_DATA',
             'warning': '⚠️  This is MOCK data for development. Real API is blocked by Google.',
             'timestamp': datetime.utcnow().isoformat()

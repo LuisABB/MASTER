@@ -71,6 +71,7 @@ def aliexpress_search():
             category_map = {}
 
         result['competitors'] = enrich_competitors(competitors, category_map)
+        
 
         csv_file = _save_aliexpress_csv(result, request_id=g.request_id)
         result['csv_file'] = csv_file

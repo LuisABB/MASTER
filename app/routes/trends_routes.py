@@ -13,7 +13,6 @@ class TrendQuerySchema(Schema):
     keyword = fields.Str(required=True, validate=validate.Length(min=1, max=100))
     country = fields.Str(required=True, validate=validate.OneOf(['MX', 'CR', 'ES']))
     window_days = fields.Int(missing=30, validate=validate.Range(min=1, max=90))
-    baseline_days = fields.Int(missing=365, validate=validate.Range(min=7, max=1825))
 
 
 @trends_bp.route('/query', methods=['POST'])
@@ -26,7 +25,6 @@ def query_trend():
         "keyword": "viva mexico",
         "country": "ES",
         "window_days": 30,
-        "baseline_days": 1795
     }
     """
     try:
@@ -45,7 +43,7 @@ def query_trend():
             keyword=data['keyword'],
             country=data['country'],
             window_days=data['window_days'],
-            baseline_days=data['baseline_days'],
+            baseline_days=data['window_days'],
             request_id=g.request_id
         )
         

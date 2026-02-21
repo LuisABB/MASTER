@@ -27,11 +27,9 @@ def fusion_query():
     Body: {
         "keyword": "zapatillas",
         "country": "CR",     // For Google Trends and YouTube
-        "window_days": 30,
-        "baseline_days": 365,
+        "window_days": 365,
         "lang": "es",        // Optional, default es (used for YouTube and AliExpress)
         "maxResults": 25,    // Optional for YouTube
-        "ship_to_country": "MX",      // Optional for AliExpress (deprecated, uses country)
         "target_currency": "MXN",     // Optional for AliExpress
         "page": 1,                   // Optional for AliExpress
         "page_size": 10              // Optional for AliExpress
@@ -58,7 +56,7 @@ def fusion_query():
         country = str(data.get('country', 'MX')).upper()
         region = country  # Use country for YouTube region to avoid duplicate params
         window_days = min(90, max(1, int(data.get('window_days', 30))))
-        baseline_days = min(1825, max(30, int(data.get('baseline_days', 365))))
+        baseline_days = window_days
         lang = str(data.get('lang', 'es')).lower()
         max_results = min(50, max(1, int(data.get('maxResults', 25))))
 
@@ -332,15 +330,23 @@ def _save_separate_csvs(response: dict, trends_result: dict, youtube_result: dic
                 'request_id',
                 'generated_at',
                 'keyword',
-                'region',
+                'country',
+                'lang',
                 'window_days',
-                'intent_score',
-                'videos_analyzed',
-                'total_views',
+                'query_used',
                 'video_id',
-                'video_title',
-                'video_views',
-                'video_engagement'
+                'title',
+                'channel_title',
+                'published_at',
+                'url',
+                'duration',
+                'views',
+                'likes',
+                'comments',
+                'engagement_rate',
+                'days_since_publish',
+                'freshness',
+                'video_intent'
             ])
 
             for video in youtube_result.get('videos', []):
@@ -348,15 +354,23 @@ def _save_separate_csvs(response: dict, trends_result: dict, youtube_result: dic
                     response['request_id'],
                     response['generated_at'],
                     response['keyword'],
-                    response['region'],
+                    response['country'],
+                    response['lang'],
                     response['window_days'],
-                    response['youtube']['intent_score'],
-                    response['youtube']['videos_analyzed'],
-                    response['youtube']['total_views'],
+                    response['youtube'].get('query_used', ''),
                     video.get('video_id', ''),
                     video.get('title', ''),
+                    video.get('channel_title', ''),
+                    video.get('published_at', ''),
+                    video.get('url', ''),
+                    video.get('duration', ''),
                     video.get('views', ''),
-                    video.get('engagement_rate', '')
+                    video.get('likes', ''),
+                    video.get('comments', ''),
+                    video.get('engagement_rate', ''),
+                    video.get('days_since_publish', ''),
+                    video.get('freshness', ''),
+                    video.get('video_intent', '')
                 ])
 
         # --- AliExpress CSV ---

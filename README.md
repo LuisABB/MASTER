@@ -84,6 +84,13 @@ NODE_ENV=test pytest --cov=app --cov-report=html
 
 ### Google Trends
 - `POST /v1/trends/query` - Query Google Trends data
+  ```json
+  {
+    "keyword": "maletas",
+    "country": "MX",
+    "window_days": 30
+  }
+  ```
 
 ### YouTube
 - `POST /v1/sources/youtube/query` - Query YouTube videos and calculate intent scores
@@ -103,14 +110,10 @@ NODE_ENV=test pytest --cov=app --cov-report=html
   {
     "keyword": "zapatillas",
     "country": "CR",
-    "region": "CR",
     "window_days": 30,
-    "baseline_days": 365,
     "lang": "es",
     "maxResults": 25,
-    "ship_to_country": "MX",
     "target_currency": "MXN",
-    "target_language": "ES",
     "page": 1,
     "page_size": 10
   }
@@ -201,7 +204,7 @@ Columnas:
 - `country`: país usado en Trends
 - `region`: región usada en YouTube (en esta versión es igual a `country`)
 - `window_days`: ventana de análisis en días
-- `baseline_days`: baseline para comparación
+- `baseline_days`: baseline para comparación (derivado de `window_days`)
 - `trends_score`: score agregado de Trends
 - `date`: fecha del punto de la serie
 - `trend_value`: valor del punto en la serie
@@ -263,6 +266,17 @@ Columnas:
 - [YouTube Data API v3](https://developers.google.com/youtube/v3)
 
 ## 📋 Changelog
+
+### v2.1.0 (2026-02-21)
+
+**Breaking Changes:**
+- ✅ `region` ya no se recibe en Fusion (YouTube usa `country`)
+- ✅ `ship_to_country` ya no se recibe en Fusion (AliExpress usa `country`)
+- ✅ `target_language` ya no se recibe en Fusion (usa `lang`)
+- ✅ `baseline_days` ya no se recibe en Trends/Fusion (usa `window_days`)
+
+**Mejoras:**
+- ✨ CSVs de Fusion ahora son 3 archivos separados con timestamp
 
 ### v2.0.0 (2026-01-31)
 

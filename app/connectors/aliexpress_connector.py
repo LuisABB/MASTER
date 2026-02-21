@@ -52,6 +52,16 @@ class AliExpressConnector:
         cached = self._cache_get(cache_key)
         if cached:
             cached['cache_hit'] = True
+            cached.setdefault('request_params', {
+                'keywords': keywords,
+                'ship_to_country': ship_to_country,
+                'target_currency': target_currency,
+                'target_language': target_language,
+                'page_no': page_no,
+                'page_size': page_size,
+                'sort': 'LAST_VOLUME_DESC',
+                'fields': 'product_id,product_title,sale_price,discount,evaluate_rate,lastest_volume,product_detail_url,shop_id,shop_url,promotion_link,category_id,first_level_category_id'
+            })
             return cached
 
         business_params = {
@@ -70,9 +80,12 @@ class AliExpressConnector:
 
         response = self._call_api('aliexpress.affiliate.product.query', business_params)
         normalized = self._normalize_response(response, keywords, ship_to_country, target_currency, target_language, page_no, page_size)
+        normalized['cache_hit'] = False
+        normalized['request_params'] = business_params
 
         self._cache_set(cache_key, normalized)
         return normalized
+
 
     def _call_api(self, method: str, business_params: Dict[str, Any]) -> Dict[str, Any]:
         public_params = {
@@ -261,6 +274,7 @@ class AliExpressConnector:
             'first_level_category_id': product.get('first_level_category_id', ''),
             'sell_score': sell_score
         }
+
 
     def get_category_children(self, parent_id: int) -> List[Dict[str, Any]]:
         """
