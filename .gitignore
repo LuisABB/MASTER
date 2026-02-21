@@ -29,6 +29,10 @@ wheels/
 .env.local
 .env.*.local
 
+# Results CSV files
+#results/
+#*.csv
+
 # Python virtual environment
 venv/
 env/

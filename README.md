@@ -2,6 +2,16 @@
 
 Migración completa del proyecto de Node.js/Express a Python/Flask.
 
+## 📦 Versiones
+
+- **Python**: 3.10+
+- **Flask**: 3.0.0
+- **Redis**: 5.0.1
+- **pytrends**: 4.9.2
+- **requests**: 2.31.0
+- **loguru**: 0.7.2
+- **pytest**: 7.4.3
+
 ## 🚀 Instalación
 
 ### 1. Crear entorno virtual
@@ -20,14 +30,24 @@ pip install -r requirements.txt
 
 ### 3. Configurar variables de entorno
 
-Copiar `.env.example` a `.env` y ajustar valores (DATABASE_URL, REDIS_URL, etc.)
+Copiar `.env.example` a `.env` y ajustar valores:
+- `REDIS_URL` - URL de conexión a Redis
+- `YOUTUBE_API_KEY` - API Key de YouTube Data API v3 (opcional, para funcionalidad YouTube)
+- `ALIEXPRESS_APP_KEY` - AppKey de AliExpress Affiliate API
+- `ALIEXPRESS_APP_SECRET` - App Secret de AliExpress Affiliate API
+- `ALIEXPRESS_TRACKING_ID` - Tracking ID (opcional)
 
-### 4. Iniciar servicios necesarios
+### 4. Iniciar Redis
 
 ```bash
-# PostgreSQL y Redis deben estar corriendo
-docker-compose up -d  # Si usas Docker
-# o iniciarlos manualmente
+# Linux/Mac
+sudo apt install redis-server  # Ubuntu/Debian
+brew install redis              # Mac
+sudo systemctl start redis      # Linux
+brew services start redis       # Mac
+
+# Verificar que funciona
+redis-cli ping  # Debe responder: PONG
 ```
 
 ## 🏃 Ejecutar
@@ -61,10 +81,58 @@ NODE_ENV=test pytest --cov=app --cov-report=html
 
 ## 📚 Endpoints
 
+### Google Trends
+- `POST /v1/trends/query` - Query Google Trends data
+
+### YouTube
+- `POST /v1/sources/youtube/query` - Query YouTube videos and calculate intent scores
+  ```json
+  {
+    "keyword": "maletas",
+    "country": "MX",
+    "lang": "es",
+    "window_days": 30,
+    "maxResults": 25
+  }
+  ```
+
+### Insights Fusion
+- `POST /v1/insights/fusion/query` - Combined insights from Google Trends + YouTube + AliExpress
+  ```json
+  {
+  "keyword": "zapatillas",
+  "country": "MX",
+  "window_days": 30,
+  "baseline_days": 365,
+  "lang": "es",
+  "maxResults": 25,
+  "target_currency": "MXN",
+  "page": 1,
+  "page_size": 10
+  }
+  ```
+
+### AliExpress Affiliate (Portals)
+- `POST /aliexpress/search` - Query AliExpress Affiliate products
+  ```json
+  {
+    "keywords": "phone",
+    "ship_to_country": "MX",
+    "target_currency": "MXN",
+    "target_language": "ES",
+    "page": 1,
+    "page_size": 10
+  }
+  ```
+
+### Utilities
 - `GET /health` - Health check
-- `POST /v1/trends/query` - Query Google Trends
 - `GET /v1/regions` - List supported regions
-- `POST /dev/mock-trends` - Mock data (dev only)
+
+### Development Only
+- `POST /dev/mock-trends` - Mock trends data
+- `POST /dev/clear-cache` - Clear Redis cache  
+- `GET /dev/cache-info` - View cache info
 
 ## 🔧 Estructura del Proyecto
 
@@ -73,46 +141,162 @@ master/
 ├── app/
 │   ├── __init__.py          # Flask app factory
 │   ├── config.py            # Configuration
-│   ├── connectors/          # Google Trends connector
-│   ├── models/              # SQLAlchemy models
+│   ├── connectors/          # External API connectors
+│   │   ├── google_trends_connector.py
+│   │   ├── youtube_connector.py
+│   │   └── aliexpress_connector.py
 │   ├── routes/              # Flask blueprints
+│   │   ├── trends_routes.py
+│   │   ├── youtube_routes.py
+│   │   ├── fusion_routes.py
+│   │   ├── aliexpress_routes.py
+│   │   └── dev_routes.py
 │   ├── services/            # Business logic
+│   │   ├── trend_engine_service.py
+│   │   ├── youtube_intent_service.py
+│   │   └── scoring_service.py
 │   ├── utils/               # Utilities (logger, dates, redis)
 │   └── middleware/          # Middleware
+├── results/                 # Generated CSV files
+│   ├── trends_data_YYYYmmdd_HHMMSS.csv
+│   ├── youtube_data_YYYYmmdd_HHMMSS.csv
+│   └── aliexpress_data_YYYYmmdd_HHMMSS.csv
 ├── tests/                   # Pytest tests
 ├── server.py                # Entry point
 ├── requirements.txt         # Python dependencies
 └── .env                     # Environment variables
 ```
 
-## 🆚 Diferencias con Node.js
-
-| Node.js | Python |
-|---------|--------|
-| Express | Flask |
-| Prisma | SQLAlchemy |
-| Jest | pytest |
-| google-trends-api | pytrends |
-| pino | loguru |
-| npm | pip |
-
-## ✅ Ventajas de Python/Flask
-
-- **pytrends** es más estable que google-trends-api
-- Mejor para data science/ML
-- Código más limpio y conciso
-- Mejor integración con pandas/numpy
-
 ## 📝 Notas
 
 - El sistema de mocks se mantiene igual (NODE_ENV=test)
 - La configuración anti-bloqueo de Google Trends está implementada
-- La base de datos PostgreSQL usa el mismo schema
-- Redis se usa para caché igual que antes
+- **No usa base de datos** - todos los resultados se cachean en Redis
+- Redis se usa para caché con TTL de 24 horas
+- **Genera CSV automáticamente** (timestamp por request):
+  - `results/trends_data_YYYYmmdd_HHMMSS.csv` - Datos de Google Trends
+  - `results/youtube_data_YYYYmmdd_HHMMSS.csv` - Datos de YouTube
+  - `results/aliexpress_data_YYYYmmdd_HHMMSS.csv` - Datos de AliExpress Affiliate
+
+## 🧾 CSVs generados (Fusion)
+
+Cada request a `/v1/insights/fusion/query` crea 3 CSV separados con timestamp. Columnas y significado:
+
+### 1) Trends CSV
+Archivo: `results/trends_data_YYYYmmdd_HHMMSS.csv`
+
+Columnas:
+- `request_id`: ID único del request
+- `generated_at`: fecha/hora UTC de generación
+- `keyword`: keyword consultada
+- `country`: país usado en Trends
+- `region`: región usada en YouTube (en esta versión es igual a `country`)
+- `window_days`: ventana de análisis en días
+- `baseline_days`: baseline para comparación
+- `trends_score`: score agregado de Trends
+- `date`: fecha del punto de la serie
+- `trend_value`: valor del punto en la serie
+
+### 2) YouTube CSV
+Archivo: `results/youtube_data_YYYYmmdd_HHMMSS.csv`
+
+Columnas:
+- `request_id`: ID único del request
+- `generated_at`: fecha/hora UTC de generación
+- `keyword`: keyword consultada
+- `region`: país/región usada en YouTube (igual a `country` del body)
+- `window_days`: ventana de análisis en días
+- `intent_score`: score agregado de intención
+- `videos_analyzed`: cantidad de videos analizados
+- `total_views`: vistas totales sumadas
+- `video_id`: ID del video
+- `video_title`: título del video
+- `video_views`: vistas del video
+- `video_engagement`: engagement rate calculado
+
+### 3) AliExpress CSV
+Archivo: `results/aliexpress_data_YYYYmmdd_HHMMSS.csv`
+
+Columnas:
+- `request_id`: ID único del request
+- `generated_at`: fecha/hora UTC de generación
+- `keyword`: keyword consultada
+- `ship_to_country`: país de envío (usa `country` del body)
+- `target_currency`: moneda objetivo
+- `target_language`: idioma objetivo (usa `lang` del body)
+- `page`: página solicitada
+- `page_size`: tamaño de página
+- `product_id`: ID del producto
+- `product_title`: título del producto
+- `sale_price`: precio de venta
+- `discount`: descuento
+- `evaluate_rate`: rating
+- `lastest_volume`: volumen reciente
+- `product_detail_url`: URL del producto
+- `shop_id`: ID de la tienda
+- `shop_url`: URL de la tienda
+- `promotion_link`: link de promoción
+- `category_id`: categoría
+- `first_level_category_id`: categoría principal
+- `sell_score`: score de ventas
 
 ## 🔗 Recursos
 
 - [Flask Documentation](https://flask.palletsprojects.com/)
 - [pytrends Documentation](https://pypi.org/project/pytrends/)
-- [SQLAlchemy Documentation](https://docs.sqlalchemy.org/)
+- [Redis Documentation](https://redis.io/docs/)
 - [pytest Documentation](https://docs.pytest.org/)
+- [YouTube Data API v3](https://developers.google.com/youtube/v3)
+
+## 📋 Changelog
+
+### v2.1.0 (2026-02-21)
+
+**Breaking Changes:**
+- ✅ `region` ya no se recibe en Fusion (YouTube usa `country`)
+- ✅ `ship_to_country` ya no se recibe en Fusion (AliExpress usa `country`)
+
+**Mejoras:**
+- ✨ CSVs de Fusion ahora son 3 archivos separados con timestamp
+- ✨ `target_language` se unifica con `lang` en Fusion
+
+### v2.0.0 (2026-01-31)
+
+**Breaking Changes:**
+- ✅ Eliminada base de datos PostgreSQL/SQLAlchemy completamente
+- ✅ Parámetro `region` renombrado a `country` en todos los endpoints
+- ✅ Sistema basado 100% en Redis para caché
+
+**Nuevas Funcionalidades:**
+- ✨ YouTube Data API v3 integrado (`/v1/sources/youtube/query`)
+- ✨ Endpoint de fusión Google Trends + YouTube (`/v1/insights/fusion/query`)
+- ✨ Cálculo de intent scores para videos de YouTube:
+  - `engagement_rate` = (likes + 2*comments) / views
+  - `freshness` = exp(-days / half_life)
+  - `video_intent` = log10(views+1) * engagement * freshness
+- ✨ Generación automática de CSVs (versión anterior)
+
+**Mejoras:**
+- 🔧 Anti-bloqueo Google Trends mejorado:
+  - Rotación de 5 User Agents diferentes
+  - Delays aleatorios (1-3s inicial, 8-12s entre requests)
+  - Exponential backoff (5 reintentos, 10-15s delay)
+- 🔧 Optimización de queries YouTube:
+  - Cambio de queries con templates a keywords directos
+  - Mejor aprovechamiento del algoritmo de relevancia de YouTube
+- 🔧 Límites de tiempo configurables:
+  - Google Trends: hasta 5 años (1825 días)
+  - YouTube: máximo 365 días (limitación API)
+- 🔧 Logging detallado con emojis para debugging
+
+**Correcciones:**
+- 🐛 Fixed: CSV no guardaba datos cuando YouTube retornaba 0 videos
+- 🐛 Fixed: Queries muy específicas fallaban en YouTube
+- 🐛 Fixed: HTTP 429 errors por exceso de requests a Google Trends
+- 🐛 Fixed: Parámetro `country` vs `region` inconsistente
+
+### v1.0.0 (2025-12-XX)
+- 🎉 Migración inicial de Node.js/Express a Python/Flask
+- ✅ Google Trends API con pytrends
+- ✅ Redis para caché (24h TTL)
+- ✅ Sistema de mocks para testing

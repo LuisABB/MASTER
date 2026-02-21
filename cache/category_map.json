@@ -1,0 +1,92 @@
+{
+  "15": {
+    "labels": [
+      "nuevo",
+      "telescopio",
+      "monocular",
+      "mini",
+      "telescopio",
+      "portátil",
+      "teléfono",
+      "móvil",
+      "soporte",
+      "camping"
+    ],
+    "macro_category": "Óptica/Telescopios",
+    "macro_path": "Outdoor > Óptica/Telescopios",
+    "updated_at": "2026-02-21T15:48:12.098393",
+    "confidence": "inferred"
+  },
+  "202192403": {
+    "labels": [
+      "uds",
+      "protector",
+      "pantalla",
+      "cristal",
+      "funda",
+      "teléfono",
+      "iphone",
+      "pro",
+      "max",
+      "mini"
+    ],
+    "macro_category": "Fundas/Protección",
+    "macro_path": "Telefonía > Fundas/Protección",
+    "updated_at": "2026-02-21T15:48:12.098486",
+    "confidence": "inferred"
+  },
+  "18": {
+    "labels": [
+      "telescopio",
+      "monocular",
+      "2000x25",
+      "mini",
+      "telescopio",
+      "portátil",
+      "teléfono",
+      "móvil",
+      "soporte",
+      "acampar"
+    ],
+    "macro_category": "Óptica/Telescopios",
+    "macro_path": "Outdoor > Óptica/Telescopios",
+    "updated_at": "2026-02-21T15:48:12.098552",
+    "confidence": "inferred"
+  },
+  "44": {
+    "labels": [
+      "adaptador",
+      "pared",
+      "usb",
+      "tipo",
+      "puertos",
+      "120",
+      "carga",
+      "rápida",
+      "teléfonos",
+      "móviles"
+    ],
+    "macro_category": "Cargadores",
+    "macro_path": "Electrónica > Cargadores",
+    "updated_at": "2026-02-21T15:48:12.098608",
+    "confidence": "inferred"
+  },
+  "36": {
+    "labels": [
+      "nuevo",
+      "abalorio",
+      "plata",
+      "ley",
+      "925",
+      "forma",
+      "perro",
+      "gato",
+      "mascotas",
+      "colgante"
+    ],
+    "macro_category": null,
+    "macro_path": null,
+    "updated_at": "2026-02-21T15:52:21.226669",
+    "confidence": "unknown"
+  }
+}
