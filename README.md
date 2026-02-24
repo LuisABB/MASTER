@@ -71,6 +71,34 @@ systemctl status redis-server
 redis-cli ping  # Debe responder: PONG
 ```
 
+#### Activar Redis en Windows
+
+Opción A (recomendada): WSL
+
+```bash
+# En PowerShell (una vez)
+wsl --install
+
+# Luego, dentro de WSL (Ubuntu)
+sudo apt update
+sudo apt install redis-server
+sudo systemctl enable redis-server
+sudo systemctl start redis-server
+redis-cli ping  # Debe responder: PONG
+```
+
+Opción B: Docker Desktop
+
+```bash
+docker run -d --name redis -p 6379:6379 redis:7
+redis-cli ping  # Debe responder: PONG
+```
+
+Opción C: Windows nativo (no oficial, solo si lo necesitas)
+
+- Instalar desde: https://github.com/tporadowski/redis/releases
+- Ejecutar `redis-server.exe` y luego `redis-cli.exe ping`.
+
 #### Notas útiles
 
 - El servicio escucha por defecto en `127.0.0.1:6379`.
