@@ -12,7 +12,7 @@ class TrendQuerySchema(Schema):
     """Schema for trend query validation."""
     keyword = fields.Str(required=True, validate=validate.Length(min=1, max=100))
     country = fields.Str(required=True, validate=validate.OneOf(['MX', 'CR', 'ES']))
-    window_days = fields.Int(missing=30, validate=validate.Range(min=1, max=90))
+    window_days = fields.Int(missing=30, validate=validate.Range(min=1, max=1825))
 
 
 @trends_bp.route('/query', methods=['POST'])

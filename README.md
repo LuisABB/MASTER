@@ -31,7 +31,6 @@ pip install -r requirements.txt
 ### 3. Configurar variables de entorno
 
 Copiar `.env.example` a `.env` y ajustar valores:
-- `REDIS_URL` - URL de conexión a Redis
 - `YOUTUBE_API_KEY` - API Key de YouTube Data API v3 (opcional, para funcionalidad YouTube)
 - `ALIEXPRESS_APP_KEY` - AppKey de AliExpress Affiliate API
 - `ALIEXPRESS_APP_SECRET` - App Secret de AliExpress Affiliate API
@@ -50,6 +49,39 @@ brew services start redis       # Mac
 # Verificar que funciona
 redis-cli ping  # Debe responder: PONG
 ```
+
+#### Activar Redis en Linux (Ubuntu/Pop!_OS/Debian)
+
+```bash
+# Instalar
+sudo apt update
+sudo apt install redis-server
+
+# Activar al inicio del sistema
+sudo systemctl enable redis-server
+
+# Iniciar el servicio
+sudo systemctl start redis-server
+
+# Ver estado
+systemctl status redis-server
+
+# Probar conexión
+redis-cli ping  # Debe responder: PONG
+```
+
+#### Activar Redis en Windows
+
+Windows nativo (no oficial, solo si lo necesitas)
+
+- Instalar desde: https://github.com/tporadowski/redis/releases
+- Ejecutar `redis-server.exe` y luego `redis-cli.exe ping`.
+
+#### Notas útiles
+
+- El servicio escucha por defecto en `127.0.0.1:6379`.
+- Configuración: `/etc/redis/redis.conf`.
+- Si el puerto cambia, actualiza `REDIS_URL` en `.env`.
 
 ## 🏃 Ejecutar
 
@@ -146,46 +178,65 @@ NODE_ENV=test pytest --cov=app --cov-report=html
 ```
 master/
 ├── app/
-│   ├── __init__.py          # Flask app factory
-│   ├── config.py            # Configuration
-│   ├── connectors/          # External API connectors
+│   ├── __init__.py
+│   ├── config.py
+│   ├── connectors/
 │   │   ├── google_trends_connector.py
 │   │   ├── youtube_connector.py
 │   │   └── aliexpress_connector.py
-│   ├── routes/              # Flask blueprints
+│   ├── routes/
 │   │   ├── trends_routes.py
 │   │   ├── youtube_routes.py
 │   │   ├── fusion_routes.py
 │   │   ├── aliexpress_routes.py
 │   │   └── dev_routes.py
-│   ├── services/            # Business logic
+│   ├── services/
 │   │   ├── trend_engine_service.py
 │   │   ├── youtube_intent_service.py
 │   │   └── scoring_service.py
-│   ├── utils/               # Utilities (logger, dates, redis)
-│   └── middleware/          # Middleware
-├── results/                 # Generated CSV files
+│   ├── utils/
+│   │   ├── logger.py
+│   │   ├── dates.py
+│   │   ├── redis_client.py
+│   │   └── mongodb_fusion_insert.py
+│   └── middleware/
+├── results/
 │   ├── trends_data.csv
 │   ├── youtube_data.csv
 │   ├── fusion_data.csv
 │   └── aliexpress_data.csv
-├── tests/                   # Pytest tests
-├── server.py                # Entry point
-├── requirements.txt         # Python dependencies
-└── .env                     # Environment variables
+├── tests/
+├── server.py
+├── requirements.txt
+└── .env
 ```
 
 ## 📝 Notas
 
 - El sistema de mocks se mantiene igual (NODE_ENV=test)
 - La configuración anti-bloqueo de Google Trends está implementada
-- **No usa base de datos** - todos los resultados se cachean en Redis
-- Redis se usa para caché con TTL de 24 horas
-- **Genera CSV automáticamente**:
+**Inserción automática en MongoDB** - Cada request a `/v1/insights/fusion/query` inserta el JSON completo en la base de datos MongoDB (`ecommerce_metrics`) usando la función avanzada. No es necesario cargar archivos manualmente, los datos se almacenan directamente desde el endpoint.
+Redis se usa para caché con TTL de 24 horas
+**Genera CSV automáticamente**:
   - `results/trends_data.csv` - Datos de Google Trends
   - `results/youtube_data.csv` - Datos de YouTube
   - `results/fusion_data.csv` - Datos combinados con score de fusión (incluye AliExpress)
   - `results/aliexpress_data.csv` - Datos de AliExpress Affiliate
+
+## 🗄️ MongoDB: Inserción automática
+
+Cada vez que se consulta `/v1/insights/fusion/query`, el JSON de respuesta se inserta automáticamente en la base de datos MongoDB (`ecommerce_metrics`).
+
+Las colecciones avanzadas incluyen:
+- `fusion_requests`
+- `aliexpress_competitors`
+- `aliexpress_request_meta`
+- `trends_series`
+- `trends_summary`
+- `youtube_videos`
+- `youtube_summary`
+
+No es necesario cargar archivos .json manualmente, la inserción se realiza directamente desde el endpoint Flask usando la función `insertar_fusion_json_en_mongodb`.
 
 Notas de AliExpress CSV:
 - Incluye `category_name`, `category_path`, `macro_category`, `macro_path` y `category_resolution_confidence` cuando `CATEGORY_RESOLUTION_MODE=api`.

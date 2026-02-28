@@ -1,6 +1,4 @@
 """Fusion Routes - Combined insights from multiple sources."""
-import csv
-import os
 import uuid
 from datetime import datetime
 from flask import Blueprint, request, jsonify, g
@@ -36,7 +34,7 @@ def fusion_query():
     }
     
     Returns:
-        Unified JSON with google_trends, youtube, fusion metrics, and CSV paths
+        Unified JSON with google_trends, youtube, and fusion metrics
     """
     try:
         logger.info(
@@ -84,8 +82,7 @@ def fusion_query():
             country=country,
             window_days=window_days,
             baseline_days=baseline_days,
-            request_id=request_id,
-            save_csv=False  # Don't save separate trends CSV, fusion will save combined data
+            request_id=request_id
         )
         
         # === 2. YouTube ===
@@ -177,7 +174,6 @@ def fusion_query():
                 'page': ae_page,
                 'page_size': ae_page_size
             },
-            
             # Google Trends data
             'google_trends': {
                 'trend_score': trends_result['trend_score'],
@@ -187,7 +183,6 @@ def fusion_query():
                 'series_count': len(trends_result['series']),
                 'by_country': trends_result['by_country']
             },
-            
             # YouTube data
             'youtube': {
                 'intent_score': youtube_result['intent_score'],
@@ -196,7 +191,6 @@ def fusion_query():
                 'query_used': youtube_data.get('query_used', ''),
                 'videos': youtube_result['videos']
             },
-
             # AliExpress data
             'aliexpress': {
                 'paging': aliexpress_result.get('paging', {}),
@@ -204,7 +198,6 @@ def fusion_query():
                 'competitors': aliexpress_result.get('competitors', []),
                 'error': aliexpress_result.get('error')
             },
-            
             # Fusion metrics
             'fusion': {
                 'combined_score': fusion_score['combined_score'],
@@ -212,14 +205,22 @@ def fusion_query():
                 'weight_youtube': fusion_score['weight_youtube'],
                 'recommendation': fusion_score['recommendation']
             },
-            
             # Time series (from Trends)
             'series': trends_result['series']
         }
-        
-        # === 6. Save separate CSVs ===
-        csv_files = _save_separate_csvs(response, trends_result, youtube_result, aliexpress_result)
-        response['csv_files'] = csv_files
+
+        # === Inserción automática en MongoDB ===
+        try:
+            from app.utils.mongodb_fusion_insert import insertar_fusion_json_en_mongodb
+            from pymongo import MongoClient
+            MI_URI = "mongodb+srv://David:Mysehna123@cluster0.2lyc7x2.mongodb.net/?retryWrites=true&w=majority"
+            MI_BD = "ecommerce_metrics"
+            client = MongoClient(MI_URI)
+            db = client[MI_BD]
+            insertar_fusion_json_en_mongodb(response, db)
+            client.close()
+        except Exception as mongo_err:
+            logger.error(f'Error al insertar en MongoDB: {mongo_err}', request_id=request_id)
         
         logger.info(
             f'Fusion query completed successfully',
@@ -274,186 +275,4 @@ def _calculate_fusion_score(trends_score: float, youtube_intent: float, youtube_
         'recommendation': recommendation
     }
 
-
-def _save_separate_csvs(response: dict, trends_result: dict, youtube_result: dict, aliexpress_result: dict) -> dict:
-    """
-    Save separate CSV files for Trends, YouTube, and AliExpress.
-    
-    Creates:
-    - results/trends_data_YYYYmmdd_HHMMSS.csv
-    - results/youtube_data_YYYYmmdd_HHMMSS.csv
-    - results/aliexpress_data_YYYYmmdd_HHMMSS.csv
-    """
-    try:
-        results_dir = 'results'
-        os.makedirs(results_dir, exist_ok=True)
-        timestamp = datetime.utcnow().strftime('%Y%m%d_%H%M%S')
-
-        trends_csv = os.path.join(results_dir, f'trends_data_{timestamp}.csv')
-        youtube_csv = os.path.join(results_dir, f'youtube_data_{timestamp}.csv')
-        aliexpress_csv = os.path.join(results_dir, f'aliexpress_data_{timestamp}.csv')
-
-        # --- Trends CSV ---
-        with open(trends_csv, 'w', newline='', encoding='utf-8') as f:
-            writer = csv.writer(f)
-            writer.writerow([
-                'request_id',
-                'generated_at',
-                'keyword',
-                'country',
-                'region',
-                'window_days',
-                'baseline_days',
-                'trends_score',
-                'date',
-                'trend_value'
-            ])
-
-            for point in trends_result.get('series', []):
-                writer.writerow([
-                    response['request_id'],
-                    response['generated_at'],
-                    response['keyword'],
-                    response['country'],
-                    response['region'],
-                    response['window_days'],
-                    response['baseline_days'],
-                    response['google_trends']['trend_score'],
-                    point['date'],
-                    point['value']
-                ])
-
-        # --- YouTube CSV ---
-        with open(youtube_csv, 'w', newline='', encoding='utf-8') as f:
-            writer = csv.writer(f)
-            writer.writerow([
-                'request_id',
-                'generated_at',
-                'keyword',
-                'country',
-                'lang',
-                'window_days',
-                'query_used',
-                'video_id',
-                'title',
-                'channel_title',
-                'published_at',
-                'url',
-                'duration',
-                'views',
-                'likes',
-                'comments',
-                'engagement_rate',
-                'days_since_publish',
-                'freshness',
-                'video_intent'
-            ])
-
-            for video in youtube_result.get('videos', []):
-                writer.writerow([
-                    response['request_id'],
-                    response['generated_at'],
-                    response['keyword'],
-                    response['country'],
-                    response['lang'],
-                    response['window_days'],
-                    response['youtube'].get('query_used', ''),
-                    video.get('video_id', ''),
-                    video.get('title', ''),
-                    video.get('channel_title', ''),
-                    video.get('published_at', ''),
-                    video.get('url', ''),
-                    video.get('duration', ''),
-                    video.get('views', ''),
-                    video.get('likes', ''),
-                    video.get('comments', ''),
-                    video.get('engagement_rate', ''),
-                    video.get('days_since_publish', ''),
-                    video.get('freshness', ''),
-                    video.get('video_intent', '')
-                ])
-
-        # --- AliExpress CSV ---
-        with open(aliexpress_csv, 'w', newline='', encoding='utf-8') as f:
-            writer = csv.writer(f)
-            writer.writerow([
-                'request_id',
-                'generated_at',
-                'keyword',
-                'ship_to_country',
-                'target_currency',
-                'target_language',
-                'page',
-                'page_size',
-                'product_id',
-                'product_title',
-                'sale_price',
-                'discount',
-                'evaluate_rate',
-                'lastest_volume',
-                'product_detail_url',
-                'shop_id',
-                'shop_url',
-                'promotion_link',
-                'category_id',
-                'category_name',
-                'category_path',
-                'macro_category',
-                'macro_path',
-                'category_resolution_confidence',
-                'first_level_category_id',
-                'sell_score'
-            ])
-
-            for item in aliexpress_result.get('competitors', []):
-                writer.writerow([
-                    response['request_id'],
-                    response['generated_at'],
-                    response['keyword'],
-                    response['aliexpress_query']['ship_to_country'],
-                    response['aliexpress_query']['target_currency'],
-                    response['aliexpress_query']['target_language'],
-                    response['aliexpress_query']['page'],
-                    response['aliexpress_query']['page_size'],
-                    item.get('product_id', ''),
-                    item.get('product_title', ''),
-                    item.get('sale_price', ''),
-                    item.get('discount', ''),
-                    item.get('evaluate_rate', ''),
-                    item.get('lastest_volume', ''),
-                    item.get('product_detail_url', ''),
-                    item.get('shop_id', ''),
-                    item.get('shop_url', ''),
-                    item.get('promotion_link', ''),
-                    item.get('category_id', ''),
-                    item.get('category_name', ''),
-                    item.get('category_path', ''),
-                    item.get('macro_category', ''),
-                    item.get('macro_path', ''),
-                    item.get('category_resolution_confidence', ''),
-                    item.get('first_level_category_id', ''),
-                    item.get('sell_score', '')
-                ])
-
-        logger.info(
-            f'📊 Fusion results saved to separate CSV files',
-            trends_csv=trends_csv,
-            youtube_csv=youtube_csv,
-            aliexpress_csv=aliexpress_csv,
-            keyword=response['keyword']
-        )
-
-        return {
-            'trends': trends_csv,
-            'youtube': youtube_csv,
-            'aliexpress': aliexpress_csv
-        }
-        
-    except Exception as error:
-        logger.error(f'Failed to save separate CSVs: {error}')
-        return {
-            'trends': '',
-            'youtube': '',
-            'aliexpress': ''
-        }
 __all__ = ['fusion_bp']

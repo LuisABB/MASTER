@@ -1,6 +1,4 @@
 """Trend Engine Service - Orchestrates trend analysis workflow."""
-import csv
-import os
 from datetime import datetime
 from typing import Dict, Optional
 from loguru import logger
@@ -40,8 +38,7 @@ class TrendEngineService:
         country: str,
         window_days: int,
         baseline_days: int,
-        request_id: str,
-        save_csv: bool = True
+        request_id: str
     ) -> Dict:
         """
         Execute trend query with caching.
@@ -52,7 +49,6 @@ class TrendEngineService:
             window_days: Recent window for analysis
             baseline_days: Historical baseline period
             request_id: Request ID for tracking
-            save_csv: Whether to save results to CSV (default: True)
             
         Returns:
             Dictionary with trend analysis results
@@ -83,9 +79,6 @@ class TrendEngineService:
                     'ttl_seconds': ttl
                 }
             }
-            # Save to CSV if requested
-            if save_csv:
-                self._save_to_csv(response)
             return response
         
         logger.info(f'Cache miss - fetching fresh data', request_id=request_id, cache_key=cache_key)
@@ -131,9 +124,6 @@ class TrendEngineService:
             # Cache the result
             redis_client.set(cache_key, response)
             
-            # Save to CSV if requested
-            if save_csv:
-                self._save_to_csv(response)
             
             logger.info(
                 f'Trend query completed successfully',
@@ -205,69 +195,6 @@ class TrendEngineService:
                 500,
                 {'originalError': error_msg}
             )
-    
-    def _save_to_csv(self, response: Dict):
-        """
-        Save trend query results to CSV file.
-        All data in one file with complete information per row.
-        """
-        try:
-            # Create results directory if it doesn't exist
-            results_dir = 'results'
-            os.makedirs(results_dir, exist_ok=True)
-            
-            # Single CSV file with all data
-            csv_file = os.path.join(results_dir, 'trends_data.csv')
-            
-            # Check if file exists
-            file_exists = os.path.exists(csv_file)
-            
-            with open(csv_file, 'a', newline='', encoding='utf-8') as f:
-                writer = csv.writer(f)
-                
-                # Write header if file is new
-                if not file_exists:
-                    writer.writerow([
-                        'timestamp',
-                        'keyword',
-                        'country',
-                        'window_days',
-                        'baseline_days',
-                        'trend_score',
-                        'source',
-                        'cache_hit',
-                        'request_id',
-                        'date',
-                        'value'
-                    ])
-                
-                # Write one row per time series data point
-                # (summary info is repeated in each row)
-                for point in response['series']:
-                    writer.writerow([
-                        response['generated_at'],
-                        response['keyword'],
-                        response['country'],
-                        response['window_days'],
-                        response['baseline_days'],
-                        response['trend_score'],
-                        response['sources_used'][0] if response['sources_used'] else 'unknown',
-                        response['cache']['hit'],
-                        response.get('request_id', 'unknown'),
-                        point['date'],
-                        point['value']
-                    ])
-            
-            logger.info(
-                f'📊 Results saved to CSV',
-                csv_file=csv_file,
-                keyword=response['keyword'],
-                rows=len(response['series'])
-            )
-            
-        except Exception as error:
-            logger.error(f'Failed to save results to CSV: {error}')
-            # Don't throw - saving CSV is non-critical
 
 
 # Singleton instance
