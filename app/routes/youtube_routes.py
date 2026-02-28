@@ -1,8 +1,6 @@
 """YouTube Routes - Endpoints for YouTube video analysis."""
-import csv
-import os
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask import Blueprint, request, jsonify, g
 from loguru import logger
 
@@ -22,12 +20,12 @@ def youtube_query():
         "keyword": "maletas",
         "country": "MX",     // Optional, default MX
         "lang": "es",        // Optional, default es
-        "window_days": 30,   // Optional, default 30
+        "window_days": 30,   // Optional, default 30 (max 1825)
         "maxResults": 25     // Optional, default 25, max 50
     }
     
     Returns:
-        JSON with videos, intent_score, and CSV file path
+        JSON with videos and intent_score
     """
     try:
         logger.info(
@@ -50,8 +48,9 @@ def youtube_query():
         
         country = str(data.get('country', 'MX')).upper()
         lang = str(data.get('lang', 'es')).lower()
-        window_days = min(90, max(1, int(data.get('window_days', 30))))
+        window_days = min(1825, max(1, int(data.get('window_days', 30))))
         max_results = min(50, max(1, int(data.get('maxResults', 25))))
+        order = 'viewcount'
         
         logger.info(
             f'Executing YouTube query',
@@ -67,7 +66,10 @@ def youtube_query():
             region=country,
             lang=lang,
             window_days=window_days,
-            max_results=max_results
+            max_results=max_results,
+            max_pages=1,
+            segment_days=window_days,
+            order=order
         )
         
         # Calculate intent scores
@@ -83,6 +85,8 @@ def youtube_query():
         request_id = str(uuid.uuid4())
         generated_at = datetime.utcnow().isoformat()
         
+        published_after = (datetime.utcnow() - timedelta(days=window_days)).replace(microsecond=0).isoformat() + 'Z'
+
         response = {
             'request_id': request_id,
             'generated_at': generated_at,
@@ -90,17 +94,13 @@ def youtube_query():
             'country': country,
             'lang': lang,
             'window_days': window_days,
-            'published_after': (datetime.utcnow().replace(microsecond=0).isoformat() + 'Z').replace('+00:00', ''),
+            'published_after': published_after,
             'query_used': youtube_data['query_used'],
             'videos_analyzed': result['videos_analyzed'],
             'total_views': result['total_views'],
             'intent_score': result['intent_score'],
             'videos': result['videos']
         }
-        
-        # Save to CSV
-        csv_file = _save_youtube_csv(response)
-        response['csv_file'] = csv_file
         
         logger.info(
             f'YouTube query completed successfully',
@@ -126,93 +126,4 @@ def youtube_query():
             'error': 'Failed to process YouTube query',
             'details': str(err)
         }), 500
-
-
-def _save_youtube_csv(response: dict) -> str:
-    """
-    Save YouTube results to CSV file.
-    
-    Args:
-        response: Complete YouTube response dictionary
-        
-    Returns:
-        Path to generated CSV file
-    """
-    try:
-        # Create results directory
-        results_dir = 'results'
-        os.makedirs(results_dir, exist_ok=True)
-        
-        csv_file = os.path.join(results_dir, 'youtube_data.csv')
-        
-        # Check if file exists
-        file_exists = os.path.exists(csv_file)
-        
-        with open(csv_file, 'a', newline='', encoding='utf-8') as f:
-            writer = csv.writer(f)
-            
-            # Write header if file is new
-            if not file_exists:
-                writer.writerow([
-                    'request_id',
-                    'generated_at',
-                    'keyword',
-                    'country',
-                    'lang',
-                    'window_days',
-                    'query_used',
-                    'video_id',
-                    'title',
-                    'channel_title',
-                    'published_at',
-                    'url',
-                    'duration',
-                    'views',
-                    'likes',
-                    'comments',
-                    'engagement_rate',
-                    'days_since_publish',
-                    'freshness',
-                    'video_intent'
-                ])
-            
-            # Write one row per video
-            for video in response['videos']:
-                writer.writerow([
-                    response['request_id'],
-                    response['generated_at'],
-                    response['keyword'],
-                    response['country'],
-                    response['lang'],
-                    response['window_days'],
-                    response['query_used'],
-                    video['video_id'],
-                    video['title'],
-                    video['channel_title'],
-                    video['published_at'],
-                    video['url'],
-                    video['duration'],
-                    video['views'],
-                    video['likes'],
-                    video['comments'],
-                    video['engagement_rate'],
-                    video['days_since_publish'],
-                    video['freshness'],
-                    video['video_intent']
-                ])
-        
-        logger.info(
-            f'📊 YouTube results saved to CSV',
-            csv_file=csv_file,
-            keyword=response['keyword'],
-            rows=len(response['videos'])
-        )
-        
-        return csv_file
-        
-    except Exception as error:
-        logger.error(f'Failed to save YouTube CSV: {error}')
-        return ''
-
-
 __all__ = ['youtube_bp']

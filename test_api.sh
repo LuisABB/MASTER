@@ -29,8 +29,7 @@ curl -s -X POST "$BASE_URL/dev/mock-trends" \
   -d '{
     "keyword": "test",
     "country": "MX",
-    "window_days": 7,
-    "baseline_days": 30
+    "window_days": 7
   }' | jq -r '.source, "TimeSeries:", (.timeSeries | length)' || echo "❌ Failed"
 echo ""
 
@@ -41,8 +40,7 @@ curl -s --max-time 60 -X POST "$BASE_URL/v1/trends/query" \
   -d '{
     "keyword": "python",
     "country": "MX",
-    "window_days": 7,
-    "baseline_days": 30
+    "window_days": 7
   }' | jq -r '.keyword, .trend_score, (.series | length), .sources_used[0]' || echo "❌ Failed"
 echo ""
 

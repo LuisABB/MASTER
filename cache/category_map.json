@@ -160,5 +160,275 @@
     "macro_path": "Motorcycle Equipments & Parts",
     "updated_at": "2026-02-21T18:33:25.352667",
     "confidence": "api_verified"
+  },
+  "26": {
+    "labels": [
+      "anillos",
+      "magnéticos",
+      "fidget",
+      "toy",
+      "set",
+      "adult",
+      "fidget",
+      "magnets",
+      "spinner",
+      "rings"
+    ],
+    "macro_category": "Toys & Hobbies",
+    "macro_path": "Toys & Hobbies",
+    "updated_at": "2026-02-21T18:38:51.899988",
+    "confidence": "api_verified"
+  },
+  "13": {
+    "labels": [
+      "uds",
+      "608zz",
+      "rodamiento",
+      "rígido",
+      "bolas",
+      "doble",
+      "escudo",
+      "monopatín",
+      "rodamientos",
+      "bolas"
+    ],
+    "macro_category": "Home Improvement",
+    "macro_path": "Home Improvement",
+    "updated_at": "2026-02-21T21:45:40.642119",
+    "confidence": "api_verified"
+  },
+  "2": {
+    "labels": [
+      "paleta",
+      "bellota",
+      "100",
+      "iberica",
+      "sobres",
+      "100g",
+      "elaboración",
+      "tradicional",
+      "ibéricos",
+      "faustino"
+    ],
+    "macro_category": "Food",
+    "macro_path": "Food",
+    "updated_at": "2026-02-21T21:58:06.795737",
+    "confidence": "api_verified"
+  },
+  "7": {
+    "labels": [
+      "kbdiy",
+      "gmk",
+      "keycap",
+      "doble",
+      "disparo",
+      "gmk",
+      "olivia",
+      "shoko",
+      "jamon",
+      "wob"
+    ],
+    "macro_category": "Computer & Office",
+    "macro_path": "Computer & Office",
+    "updated_at": "2026-02-21T21:58:06.795860",
+    "confidence": "api_verified"
+  },
+  "202192403": {
+    "labels": [
+      "soporte",
+      "ajustable",
+      "teléfono",
+      "móvil",
+      "escritorio",
+      "soporte",
+      "universal",
+      "teléfono",
+      "celular",
+      "escritorio"
+    ],
+    "macro_category": "Phones & Telecommunications Accessories",
+    "macro_path": "Phones & Telecommunications Accessories",
+    "updated_at": "2026-02-24T04:43:30.171313",
+    "confidence": "api_verified"
+  },
+  "200000345": {
+    "labels": [
+      "cseta",
+      "manga",
+      "larga",
+      "talla",
+      "ande",
+      "mujer",
+      "nuevo",
+      "diseño",
+      "principios",
+      "otoño"
+    ],
+    "macro_category": "Women's Clothing",
+    "macro_path": "Women's Clothing",
+    "updated_at": "2026-02-28T19:07:11.883902",
+    "confidence": "api_verified"
+  },
+  "66": {
+    "labels": [
+      "aceite",
+      "canela",
+      "10ml",
+      "aceites",
+      "esenciales",
+      "canela",
+      "100",
+      "naturales",
+      "aceite",
+      "esencial"
+    ],
+    "macro_category": "Beauty & Health",
+    "macro_path": "Beauty & Health",
+    "updated_at": "2026-02-28T19:07:11.883960",
+    "confidence": "api_verified"
+  },
+  "200000297": {
+    "labels": [
+      "gafas",
+      "montura",
+      "cuadrada",
+      "negra",
+      "pequeña",
+      "japonesa",
+      "vintage",
+      "y2k",
+      "gafas",
+      "fotografía"
+    ],
+    "macro_category": "Apparel Accessories",
+    "macro_path": "Apparel Accessories",
+    "updated_at": "2026-02-28T19:07:11.883981",
+    "confidence": "api_verified"
+  },
+  "322": {
+    "labels": [
+      "zapatillas",
+      "deporte",
+      "hombre",
+      "zapatos",
+      "informales",
+      "plataforma",
+      "plantillas",
+      "aumentar",
+      "altura",
+      "zapatos"
+    ],
+    "macro_category": "Shoes",
+    "macro_path": "Shoes",
+    "updated_at": "2026-02-28T19:20:52.861098",
+    "confidence": "api_verified"
+  },
+  "1420": {
+    "labels": [
+      "fuente",
+      "alimentación",
+      "ininterrumpida",
+      "ups",
+      "36w",
+      "dc1036l",
+      "salida",
+      "24v",
+      "batería",
+      "reemplazable"
+    ],
+    "macro_category": "Tools",
+    "macro_path": "Tools",
+    "updated_at": "2026-02-28T19:27:55.360052",
+    "confidence": "api_verified"
+  },
+  "39": {
+    "labels": [
+      "lámpara",
+      "led",
+      "proyector",
+      "cielo",
+      "estrellado",
+      "ola",
+      "mar",
+      "unidad",
+      "colores",
+      "control"
+    ],
+    "macro_category": "Lights & Lighting",
+    "macro_path": "Lights & Lighting",
+    "updated_at": "2026-02-28T19:28:36.710877",
+    "confidence": "api_verified"
+  },
+  "1511": {
+    "labels": [
+      "parachoques",
+      "reloj",
+      "acero",
+      "inoxidable",
+      "316",
+      "casio",
+      "shock",
+      "ae1200",
+      "dw5600",
+      "ga110"
+    ],
+    "macro_category": "Watches",
+    "macro_path": "Watches",
+    "updated_at": "2026-02-28T23:05:16.176031",
+    "confidence": "api_verified"
+  },
+  "200000343": {
+    "labels": [
+      "ropa",
+      "baloncesto",
+      "camiseta",
+      "deportiva",
+      "camisetas",
+      "diseños",
+      "gráficos",
+      "camiseta",
+      "vintage",
+      "hombre"
+    ],
+    "macro_category": "Men's Clothing",
+    "macro_path": "Men's Clothing",
+    "updated_at": "2026-02-28T23:17:32.104083",
+    "confidence": "api_verified"
+  },
+  "502": {
+    "labels": [
+      "tstardev",
+      "pickit3",
+      "pic",
+      "kit3",
+      "pickit",
+      "programador",
+      "programación",
+      "conexión",
+      "pic",
+      "microcontrolador"
+    ],
+    "macro_category": "Electronic Components & Supplies",
+    "macro_path": "Electronic Components & Supplies",
+    "updated_at": "2026-02-28T23:19:50.684251",
+    "confidence": "api_verified"
+  },
+  "6": {
+    "labels": [
+      "mini",
+      "humidificador",
+      "aire",
+      "180ml",
+      "difusor",
+      "aroma",
+      "eléctrico",
+      "usb",
+      "purificador",
+      "aceites"
+    ],
+    "macro_category": "Home Appliances",
+    "macro_path": "Home Appliances",
+    "updated_at": "2026-02-28T23:25:37.233651",
+    "confidence": "api_verified"
   }
 }
