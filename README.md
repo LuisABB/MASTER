@@ -242,68 +242,9 @@ Notas de AliExpress CSV:
 
 Cada request a `/v1/insights/fusion/query` crea 3 CSV separados con timestamp. Columnas y significado:
 
-### 1) Trends CSV
-Archivo: `results/trends_data_YYYYmmdd_HHMMSS.csv`
+## 📖 Consulta el modelo de datos
 
-Columnas:
-- `request_id`: ID único del request
-- `generated_at`: fecha/hora UTC de generación
-- `keyword`: keyword consultada
-- `country`: país usado en Trends
-- `region`: región usada en YouTube (en esta versión es igual a `country`)
-- `window_days`: ventana de análisis en días
-- `baseline_days`: baseline para comparación (derivado de `window_days`)
-- `trends_score`: score agregado de Trends
-- `date`: fecha del punto de la serie
-- `trend_value`: valor del punto en la serie
-
-### 2) YouTube CSV
-Archivo: `results/youtube_data_YYYYmmdd_HHMMSS.csv`
-
-Columnas:
-- `request_id`: ID único del request
-- `generated_at`: fecha/hora UTC de generación
-- `keyword`: keyword consultada
-- `region`: país/región usada en YouTube (igual a `country` del body)
-- `window_days`: ventana de análisis en días
-- `intent_score`: score agregado de intención
-- `videos_analyzed`: cantidad de videos analizados
-- `total_views`: vistas totales sumadas
-- `video_id`: ID del video
-- `video_title`: título del video
-- `video_views`: vistas del video
-- `video_engagement`: engagement rate calculado
-
-### 3) AliExpress CSV
-Archivo: `results/aliexpress_data_YYYYmmdd_HHMMSS.csv`
-
-Columnas:
-- `request_id`: ID único del request
-- `generated_at`: fecha/hora UTC de generación
-- `keyword`: keyword consultada
-- `ship_to_country`: país de envío (usa `country` del body)
-- `target_currency`: moneda objetivo
-- `target_language`: idioma objetivo (usa `lang` del body)
-- `page`: página solicitada
-- `page_size`: tamaño de página
-- `product_id`: ID del producto
-- `product_title`: título del producto
-- `sale_price`: precio de venta
-- `discount`: descuento
-- `evaluate_rate`: rating
-- `lastest_volume`: volumen reciente
-- `product_detail_url`: URL del producto
-- `shop_id`: ID de la tienda
-- `shop_url`: URL de la tienda
-- `promotion_link`: link de promoción
-- `category_id`: categoría
-- `category_name`: nombre de categoría (API)
-- `category_path`: ruta completa (API)
-- `macro_category`: alias de categoría (igual a `category_name` en modo `api`)
-- `macro_path`: alias de ruta (igual a `category_path` en modo `api`)
-- `category_resolution_confidence`: `api_verified|inferred|unknown`
-- `first_level_category_id`: categoría principal
-- `sell_score`: score de ventas
+Para ver la explicación completa del modelo de datos en MongoDB, revisa el archivo [MODELO_MONGODB.md](MODELO_MONGODB.md).
 
 ## 🔗 Recursos
 
