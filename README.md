@@ -71,9 +71,6 @@ redis-cli ping  # Debe responder: PONG
 ```
 
 #### Activar Redis en Windows
-
-Windows nativo (no oficial, solo si lo necesitas)
-
 - Instalar desde: https://github.com/tporadowski/redis/releases
 - Ejecutar `redis-server.exe` y luego `redis-cli.exe ping`.
 
