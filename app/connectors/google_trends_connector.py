@@ -1,12 +1,18 @@
 """Google Trends Connector using pytrends library."""
 import os
+import re
 import time
 import math
 import random
+import threading
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Tuple
+import requests as _requests_lib  # kept for potential future proxy checks
 from pytrends.request import TrendReq
 from loguru import logger
+
+# Global lock — serializes ALL pytrends requests across threads/greenlets
+_GLOBAL_REQUEST_LOCK = threading.Lock()
 
 # Detect test mode
 IS_TEST_MODE = os.getenv('NODE_ENV') == 'test'
@@ -110,8 +116,8 @@ class GoogleTrendsConnector:
         raw_cookies = os.getenv('GOOGLE_TRENDS_COOKIES', '')
         self.cookies = self._parse_cookies(raw_cookies) if raw_cookies else {}
 
-        # Lock for concurrency control
-        self.request_lock = None
+        # Lock for concurrency control (uses the module-level global lock)
+        self.request_lock = _GLOBAL_REQUEST_LOCK
         self.pytrends = None  # Will be initialized per request
         
         if IS_TEST_MODE:
@@ -150,7 +156,12 @@ class GoogleTrendsConnector:
         return cookies
 
     def _get_fresh_client(self):
-        """Create a fresh pytrends client with random user agent to avoid blocks."""
+        """Create a fresh pytrends client with random user agent to avoid blocks.
+
+        pytrends already calls GetGoogleCookie() in __init__, which visits
+        trends.google.com/explore to obtain the NID cookie automatically.
+        We just need to set realistic headers and inject any user-provided cookies.
+        """
         user_agent = random.choice(USER_AGENTS)
         logger.debug(f'🔧 Creating fresh pytrends client')
         logger.debug(f'📱 User-Agent: {user_agent[:80]}...')
@@ -176,20 +187,24 @@ class GoogleTrendsConnector:
             requests_args['proxies'] = {'http': self.proxy, 'https': self.proxy}
             logger.debug(f'🌐 Routing through proxy: {self.proxy[:50]}')
 
+        # TrendReq.__init__ calls GetGoogleCookie() which visits
+        # trends.google.com/explore — so client.cookies already has NID on return.
         client = TrendReq(
             hl='en-US',
             tz=360,
             timeout=(self.timeout, self.timeout),
-            retries=0,  # We handle retries ourselves
+            retries=0,
             backoff_factor=0,
             requests_args=requests_args
         )
 
-        # Inject cookies directly into pytrends' session to avoid the
-        # "multiple values for keyword argument 'cookies'" conflict
+        nid_from_pytrends = 'NID' in (client.cookies or {})
+        logger.debug(f'🍪 pytrends GetGoogleCookie NID present: {nid_from_pytrends} | cookies={list((client.cookies or {}).keys())}')
+
+        # Inject user-provided cookies on top (override if same key)
         if self.cookies:
-            client.cookies.update(self.cookies)
-            logger.debug(f'🍪 Injected {len(self.cookies)} browser cookies into pytrends session')
+            client.cookies = {**(client.cookies or {}), **self.cookies}
+            logger.debug(f'🍪 Merged user-provided cookies: {list(self.cookies.keys())}')
 
         return client
     
@@ -240,12 +255,16 @@ class GoogleTrendsConnector:
             logger.info(f'⏳ Initial delay: {round(initial_delay, 1)}s (anti-bot measure)')
             time.sleep(initial_delay)
 
-            # Fetch time series with retry logic
+            # Create ONE shared client — GetGoogleCookie() is called only once per fetch_complete()
+            client = self._get_fresh_client()
+            logger.debug(f'🔑 Shared client NID present: {"NID" in (client.cookies or {})}')
+
+            # Fetch time series with retry logic (reuses the same client)
             time_series = self._fetch_with_retry(
-                lambda: self._fetch_time_series(keyword, country, start_date, end_date)
+                lambda: self._fetch_time_series(keyword, country, start_date, end_date, client)
             )
 
-            # Longer delay between the two calls (30-45s) — different endpoint, fresh quota window
+            # Longer delay between the two calls (30-45s) — fresh quota window
             delay_between_requests = 30 + random.random() * 15
             logger.info(
                 f'⏳ Waiting {round(delay_between_requests, 1)}s before fetching country data (rate-limit window)...'
@@ -256,7 +275,7 @@ class GoogleTrendsConnector:
             by_country = []
             try:
                 by_country = self._fetch_with_retry(
-                    lambda: self._fetch_by_country(keyword)
+                    lambda: self._fetch_by_country(keyword, client)
                 )
             except Exception as country_err:
                 err_msg = str(country_err)
@@ -303,7 +322,8 @@ class GoogleTrendsConnector:
         keyword: str,
         country: str,
         start_date: datetime,
-        end_date: datetime
+        end_date: datetime,
+        client: Optional[TrendReq] = None
     ) -> List[Dict]:
         """Fetch time series data for a keyword in a specific country."""
         logger.info(
@@ -313,9 +333,8 @@ class GoogleTrendsConnector:
             start_date=start_date.strftime('%Y-%m-%d'),
             end_date=end_date.strftime('%Y-%m-%d')
         )
-        
-        # Get fresh client with random user agent
-        pytrends = self._get_fresh_client()
+
+        pytrends = client or self._get_fresh_client()
         
         # Build payload for pytrends
         timeframe = f'{start_date.strftime("%Y-%m-%d")} {end_date.strftime("%Y-%m-%d")}'
@@ -355,12 +374,11 @@ class GoogleTrendsConnector:
         logger.info(f'Successfully fetched time series ({len(result)} data points)')
         return result
     
-    def _fetch_by_country(self, keyword: str) -> List[Dict]:
+    def _fetch_by_country(self, keyword: str, client: Optional[TrendReq] = None) -> List[Dict]:
         """Fetch country comparison data for a keyword (global, last 12 months)."""
         logger.info(f'Fetching country comparison from Google Trends', keyword=keyword)
 
-        # Get fresh client with random user agent
-        pytrends = self._get_fresh_client()
+        pytrends = client or self._get_fresh_client()
 
         # Log active cookie names (not values) so we can verify session state
         cookie_names = list(pytrends.cookies.keys()) if hasattr(pytrends, 'cookies') else []
@@ -428,8 +446,10 @@ class GoogleTrendsConnector:
 
         for attempt in range(1, self.max_retries + 1):
             try:
-                logger.debug(f'🔄 Attempt {attempt}/{self.max_retries}')
-                return fetch_fn()
+                logger.debug(f'🔄 Attempt {attempt}/{self.max_retries} (waiting for global lock...)')
+                with self.request_lock:
+                    logger.debug(f'🔓 Lock acquired — running request')
+                    return fetch_fn()
             except Exception as error:
                 last_error = error
 
@@ -441,7 +461,7 @@ class GoogleTrendsConnector:
                 logger.debug(f'🐛 Full error type: {error_type}')
                 logger.debug(f'🐛 Full error message (first 1000 chars): {error_message[:1000]}')
 
-                # Log HTTP response details if available
+                # Log HTTP response details and auto-refresh NID cookie from Set-Cookie header
                 if hasattr(error, 'response') and error.response is not None:
                     r = error.response
                     retry_after = r.headers.get('Retry-After', 'not set')
@@ -451,6 +471,13 @@ class GoogleTrendsConnector:
                         f'| Content-Type={r.headers.get("Content-Type", "?")} '
                         f'| body_preview={r.text[:300]!r}'
                     )
+                    # Google often sends a fresh NID in the 429 Set-Cookie — use it next attempt
+                    set_cookie = r.headers.get('Set-Cookie', '')
+                    nid_match = re.search(r'NID=([^;]+)', set_cookie)
+                    if nid_match:
+                        new_nid = nid_match.group(1)
+                        self.cookies['NID'] = new_nid
+                        logger.info(f'🍪 Auto-refreshed NID cookie from 429 response (will use on next attempt)')
 
                 is_rate_limited = 'TooManyRequests' in error_type or '429' in error_message
                 is_blocked = (
