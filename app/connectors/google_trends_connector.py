@@ -360,7 +360,7 @@ class GoogleTrendsConnector:
             raise
         
         if df.empty:
-            logger.warning(f'No data returned from Google Trends for {keyword}')
+            logger.warning(f'❌❌No data returned from Google Trends for {keyword}❌❌')
             return []
         
         # Convert to list of dictionaries
