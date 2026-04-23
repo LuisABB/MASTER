@@ -155,7 +155,7 @@ def insertar_fusion_json_en_mongodb(json_data, db):
         insert_youtube_videos(json_data, db)
         log("Iniciando inserción en youtube_summary...")
         insert_youtube_summary(json_data, db)
-        log("Inserción completa en todas las colecciones.")
+        log("✅✅✅✅Inserción completa en todas las colecciones.")
         log(f"Request ID insertado: {json_data['request_id']}")
     except Exception as e:
         log_error(e)

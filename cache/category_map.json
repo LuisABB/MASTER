@@ -430,5 +430,41 @@
     "macro_path": "Home Appliances",
     "updated_at": "2026-02-28T23:25:37.233651",
     "confidence": "api_verified"
+  },
+  "1524": {
+    "labels": [
+      "deslizador",
+      "cremallera",
+      "repuesto",
+      "universal",
+      "extractor",
+      "cremallera",
+      "aleación",
+      "metal",
+      "bolsa",
+      "equipaje"
+    ],
+    "macro_category": "Luggage & Bags",
+    "macro_path": "Luggage & Bags",
+    "updated_at": "2026-04-23T05:28:23.487429",
+    "confidence": "api_verified"
+  },
+  "30": {
+    "labels": [
+      "cámara",
+      "endoscópica",
+      "tipo",
+      "ip67",
+      "resistente",
+      "agua",
+      "led",
+      "ajustables",
+      "usb",
+      "android"
+    ],
+    "macro_category": "Security & Protection",
+    "macro_path": "Security & Protection",
+    "updated_at": "2026-04-23T05:31:42.661686",
+    "confidence": "api_verified"
   }
 }
