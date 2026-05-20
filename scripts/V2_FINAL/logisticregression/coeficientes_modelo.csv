@@ -1,0 +1,45 @@
+feature,coefficient
+trends_slope,2.565901709755115
+ali_avg_sale_price,0.0
+trends_count,0.0
+ali_avg_evaluate_rate,0.0
+trends_mean,0.0
+trends_max,0.0
+trends_std,0.0
+trends_min,0.0
+trends_first_value,0.0
+trends_last_value,0.0
+trends_rel_change,0.0
+yt_total_views,0.0
+yt_total_likes,0.0
+yt_total_comments,0.0
+yt_videos_count,0.0
+yt_engagement,0.0
+ali_price_norm_by_cat,0.0
+"cat_Automobiles, Parts & Accessories",0.0
+cat_Beauty & Health,0.0
+cat_Computer & Office,0.0
+cat_Consumer Electronics,0.0
+cat_Electronic Components & Supplies,0.0
+cat_Furniture,0.0
+cat_Home & Garden,0.0
+cat_Home Appliances,0.0
+cat_Home Improvement,0.0
+cat_Industrial & Business,0.0
+cat_Jewelry & Accessories,0.0
+cat_Lights & Lighting,0.0
+cat_Luggage & Bags,0.0
+cat_Men's Clothing,0.0
+cat_Mother & Kids,0.0
+cat_Motorcycle Equipments & Parts,0.0
+cat_NA,0.0
+cat_Office & School Supplies,0.0
+cat_Phones & Telecommunications Accessories,0.0
+cat_Security & Protection,0.0
+cat_Shoes,0.0
+cat_Sports & Entertainment,0.0
+"cat_Sports Shoes,Clothing&Accessories",0.0
+cat_Tools,0.0
+cat_Toys & Hobbies,0.0
+cat_Underwear,0.0
+cat_Watches,0.0
