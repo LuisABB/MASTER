@@ -1,0 +1,41 @@
+---
+# ============================================================
+# Job — ejecuta el pipeline ML completo (V2_FINAL migrado a S3)
+# Imagen construida dentro de Minikube (imagePullPolicy: Never)
+# ============================================================
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-ml-pipeline
+  namespace: default
+  labels:
+    step: "2"
+    stage: "gold"
+spec:
+  ttlSecondsAfterFinished: 300
+  backoffLimit: 2
+  template:
+    metadata:
+      labels:
+        app: job-ml-pipeline
+        step: "2"
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: ml-pipeline
+          image: ml-pipeline:latest
+          imagePullPolicy: Never
+          env:
+            - name: S3_ENDPOINT
+              value: "http://localstack:4566"
+            - name: AWS_ACCESS_KEY_ID
+              value: "test"
+            - name: AWS_SECRET_ACCESS_KEY
+              value: "test"
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"

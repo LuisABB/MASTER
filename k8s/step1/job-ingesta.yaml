@@ -1,0 +1,109 @@
+---
+# ============================================================
+# ConfigMap — script de ingesta que crea los buckets
+# y sube el CSV crudo a LocalStack S3
+# ============================================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ingesta-script
+  namespace: default
+data:
+  ingesta.sh: |
+    #!/bin/sh
+    set -e
+
+    ENDPOINT="http://localstack:4566"
+    REGION="us-east-1"
+
+    echo "=== [Job 1] Ingesta CSV → LocalStack S3 ==="
+    echo "Endpoint: $ENDPOINT"
+    echo "Archivo:  /data/dataset_validated.csv"
+
+    # Esperar a que LocalStack esté listo
+    echo "Esperando a LocalStack..."
+    until aws --endpoint-url=$ENDPOINT --region=$REGION s3 ls > /dev/null 2>&1; do
+      echo "  LocalStack no disponible, reintentando en 3s..."
+      sleep 3
+    done
+    echo "LocalStack listo."
+
+    # Crear buckets (ignorar error si ya existen)
+    echo ""
+    echo "--- Creando bucket s3://raw-data ---"
+    aws --endpoint-url=$ENDPOINT --region=$REGION s3 mb s3://raw-data 2>/dev/null || echo "  (bucket ya existe)"
+
+    echo "--- Creando bucket s3://gold-data ---"
+    aws --endpoint-url=$ENDPOINT --region=$REGION s3 mb s3://gold-data 2>/dev/null || echo "  (bucket ya existe)"
+
+    # Subir CSV crudo
+    echo ""
+    echo "--- Subiendo dataset_validated.csv a s3://raw-data/ ---"
+    aws --endpoint-url=$ENDPOINT --region=$REGION \
+        s3 cp /data/dataset_validated.csv s3://raw-data/dataset_validated.csv \
+        --no-progress
+
+    # Verificar que se subió correctamente
+    echo ""
+    echo "--- Verificando contenido de s3://raw-data/ ---"
+    aws --endpoint-url=$ENDPOINT --region=$REGION s3 ls s3://raw-data/ --human-readable
+
+    echo ""
+    echo "=== [Job 1] COMPLETADO: CSV disponible en s3://raw-data/dataset_validated.csv ==="
+---
+# ============================================================
+# Job — ejecuta el script de ingesta una sola vez
+# Monta el CSV desde la máquina host vía hostPath
+# ============================================================
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-ingesta-csv
+  namespace: default
+  labels:
+    step: "1"
+    stage: "raw"
+spec:
+  ttlSecondsAfterFinished: 300   # auto-elimina el pod 5 min después de completar
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app: job-ingesta-csv
+        step: "1"
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: awscli
+          image: amazon/aws-cli:2.22.35
+          command: ["/bin/sh", "/scripts/ingesta.sh"]
+          env:
+            - name: AWS_ACCESS_KEY_ID
+              value: "test"
+            - name: AWS_SECRET_ACCESS_KEY
+              value: "test"
+            - name: AWS_DEFAULT_REGION
+              value: "us-east-1"
+          volumeMounts:
+            - name: script-vol
+              mountPath: /scripts
+            - name: data-vol
+              mountPath: /data
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "100m"
+            limits:
+              memory: "128Mi"
+              cpu: "200m"
+      volumes:
+        - name: script-vol
+          configMap:
+            name: ingesta-script
+            defaultMode: 0755
+        - name: data-vol
+          hostPath:
+            # Ruta dentro del nodo Minikube (no la máquina host directamente)
+            # El CSV se copia al nodo con: minikube cp ... (ver README)
+            path: /mnt/data
+            type: DirectoryOrCreate
