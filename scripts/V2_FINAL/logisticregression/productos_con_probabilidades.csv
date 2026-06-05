@@ -1,0 +1,327 @@
+keyword,category_name,success,success_proba
+patin electrico,Sports & Entertainment,0,0.03127960015984693
+Mochila impermeable,Luggage & Bags,0,0.22788212356155785
+arduino,Electronic Components & Supplies,0,0.04415040649912197
+microfonos,Consumer Electronics,0,0.04528561624453503
+teclados,Computer & Office,0,0.024942405686723394
+tenis puma,"Sports Shoes,Clothing&Accessories",0,0.0343340409173488
+laptop hp,Computer & Office,0,0.03178098573351131
+chamarras,Home & Garden,0,0.01562781979424758
+pantallas,Phones & Telecommunications Accessories,0,0.03816210974597804
+usb,Lights & Lighting,0,0.04096158955222048
+jaulas,Home & Garden,0,0.04191205548492322
+iphone,Phones & Telecommunications Accessories,0,0.02998060200970194
+destornillador electrico,Tools,0,0.050479170060509136
+teclado dareu,Computer & Office,0,0.04235752797662997
+anillo remoto,Consumer Electronics,0,0.04054555138734464
+aspiradora portatil,Home Appliances,0,0.0440914165396693
+reloj ventilador,Home Appliances,0,0.052636343657000845
+luz pastillo baseus,Lights & Lighting,0,0.04042742856477464
+power bank,Lights & Lighting,0,0.036898027821509576
+ventilador de cuello,Home Appliances,0,0.04798047902194717
+bocina retro,Sports & Entertainment,0,0.04424674723263265
+laser pointer,Sports & Entertainment,0,0.04814882047640598
+lavamanos,Home & Garden,0,0.025890172259383795
+ducha,Home & Garden,0,0.030340829868276464
+cajas de carton,Jewelry & Accessories,0,0.17500271210859744
+faros led para carro,"Automobiles, Parts & Accessories",1,0.7495473617928976
+lavadora,Home & Garden,0,0.03140021530330337
+cortina plastica,Home & Garden,0,0.04523924482757833
+mouse inalambrico,Computer & Office,0,0.04392762478998103
+teclado gamer,Computer & Office,0,0.30986829691279005
+pecera de vidrio,Home & Garden,1,0.960493744111541
+soporte para tv,Consumer Electronics,0,0.10195351501506776
+escritorio,Phones & Telecommunications Accessories,0,0.04480892712643794
+maquina de coser,Home & Garden,0,0.025909595115019255
+cama de niño,Toys & Hobbies,1,0.9828525957633176
+marmol,Home & Garden,0,0.017684748009206795
+marcador amarillo,Office & School Supplies,0,0.13989283950852996
+tornillos,Tools,0,0.016333880806386977
+control xbox,Consumer Electronics,0,0.03610351919010857
+control playstation,Consumer Electronics,0,0.056818663326748446
+raton gamer,Computer & Office,0,0.04033552166507582
+cafetera express,Home & Garden,0,0.11511870612905699
+xiaomi tag,Watches,0,0.09433690480859715
+camara web,Consumer Electronics,0,0.04219501679636827
+rastreador,Home & Garden,0,0.04332379549222068
+microfono,Consumer Electronics,0,0.03848147740489748
+camara inalambrica,"Automobiles, Parts & Accessories",0,0.1430055546018315
+hub usb,Computer & Office,0,0.046036887844648045
+organizador tarjetas,Home & Garden,0,0.04297854106451688
+impresora termica portatil,Computer & Office,0,0.06891297716425056
+cuerdas led,Lights & Lighting,0,0.043181607983477796
+soporte tablet,Computer & Office,0,0.051099242215988085
+tableta LCD,Toys & Hobbies,0,0.038469103467097775
+guitarra,Computer & Office,0,0.038482602497781127
+bateria,"Automobiles, Parts & Accessories",0,0.04057631742504452
+flautas,Sports & Entertainment,0,0.03540536481372121
+coches juguetes,Toys & Hobbies,0,0.046576706243769715
+ganchos ropa,Home & Garden,0,0.04728665275586863
+toallas,Home & Garden,0,0.03928025651037621
+mochila viaje,Sports & Entertainment,0,0.08356814343993134
+condon,,0,0.03120229794206365
+vibrador,Beauty & Health,0,0.036361536173150084
+almohadilla viaje,Home & Garden,0,0.03585882700665434
+cargador c,Phones & Telecommunications Accessories,0,0.04294103630015277
+calcetines,Underwear,0,0.03795505459739857
+violin,Sports & Entertainment,0,0.03367742653217332
+clarinete,Sports & Entertainment,0,0.2085846223054829
+trompeta,Home & Garden,0,0.05576040544805302
+piano,Home & Garden,0,0.018491346213484576
+billetera de cuero,Luggage & Bags,0,0.015870434029846937
+gafas de sol,Apparel Accessories,1,0.6600547958327674
+blanqueador dental,Beauty & Health,1,0.7126631935276916
+traje de buzo,Men's Clothing,1,0.8604578721308038
+carros hibridos,"Automobiles, Parts & Accessories",1,0.9851288010485817
+ajedrez profesional,Sports & Entertainment,1,0.5022893612482898
+monopoli,Electronic Components & Supplies,0,0.20417152417867634
+iphone 13 pro max,Phones & Telecommunications Accessories,0,0.007139958804187112
+cadena de oro,Jewelry & Accessories,0,0.022993124069610234
+collar de perlas,Jewelry & Accessories,1,0.9666663611172297
+llavero de madera,Tools,0,0.17926664354160562
+protector solar,Home Improvement,0,0.005741408449295337
+cepillo de dientes,Home & Garden,0,0.062251614252358076
+guantes de futbol,Apparel Accessories,1,0.9840909231795276
+rasuradora electrica,Home Appliances,1,0.9265115286202827
+camisetas de futbol,"Sports Shoes,Clothing&Accessories",1,0.9862573262627204
+peluches,Home & Garden,0,0.038776351273341086
+guantes de box,"Sports Shoes,Clothing&Accessories",0,0.0477296553182009
+guantes de boxeo,Sports & Entertainment,0,0.3792362674037237
+medias de compresion,Underwear,0,0.06723733022983192
+carrito de compras,Home & Garden,0,0.25259620772713337
+plancha de pelo,Beauty & Health,0,0.019896554028201646
+sombrero vaquero,Apparel Accessories,0,0.275935116932083
+montura para caballo,Apparel Accessories,0,0.47709251377199186
+licra de mujer,"Sports Shoes,Clothing&Accessories",0,0.4337782489225684
+taladro de bateria,Consumer Electronics,1,0.9778857266643765
+maquina de soldar,Tools,0,0.1647990561529255
+robot aspirador,Home Appliances,0,0.0524516659316343
+card play,"Automobiles, Parts & Accessories",0,0.0368991083953078
+aspiradora de mano,Home Appliances,0,0.06075938015414667
+aceite de oliva,Home & Garden,0,0.0416709622670879
+kit de extensiones de pestañas,Beauty & Health,0,0.0368170714620718
+pestañas postizas,Beauty & Health,0,0.059829073393757926
+brillo labial perfumado,Beauty & Health,0,0.03903543130656531
+rubor liquido,Beauty & Health,0,0.04571877880071223
+jabon blanqueador,Beauty & Health,0,0.043103783020992936
+cargador USB,Phones & Telecommunications Accessories,0,0.04614919135673872
+guantes de nitrilo,Apparel Accessories,0,0.027759193872600306
+ganchos para puerta,"Automobiles, Parts & Accessories",0,0.043608244356167246
+proyector para cine,Consumer Electronics,0,0.04677017901955489
+eslabones italianos,Jewelry & Accessories,0,0.04030963541567596
+sarten huevos,Home & Garden,0,0.0871886777225977
+lampara led escritorio,Lights & Lighting,0,0.06779186787695657
+soporte celular escritorio,Phones & Telecommunications Accessories,0,0.04833030800179864
+soporte celular coche magnetico,Phones & Telecommunications Accessories,0,0.03995822565782262
+soporte celular bicicleta,Phones & Telecommunications Accessories,0,0.043103783020992936
+base refrigerante laptop,Computer & Office,0,0.040075034795709556
+mini ventilador usb,Home Appliances,0,0.04647688658193756
+ventilador portatil mano,Home & Garden,0,0.04322937345415988
+difusor aceites esenciales,Home Appliances,0,0.09359652412252022
+purificador aire portatil,Furniture,0,0.04411833740611624
+protector teclado silicona,Phones & Telecommunications Accessories,0,0.0352333852995892
+espejo maquillaje led,Beauty & Health,0,0.05897621072477258
+organizador joyeria,Home & Garden,0,0.043481603245884216
+organizador zapatos,Home & Garden,0,0.11965474756675731
+zapatero portatil,Home & Garden,0,0.043990283089201
+dispensador jabon automatico,Home Improvement,0,0.04373523744659171
+cortador verduras manual,Home & Garden,0,0.043862583397085333
+pelador frutas acero,Home & Garden,0,0.04054555138734464
+taza mezcladora automatica,Home & Garden,0,0.039264194985213795
+molinillo cafe manual,Home & Garden,0,0.03482227712981533
+cafetera portatil viaje,Home & Garden,0,0.039379058495525546
+bascula cocina digital,Home & Garden,0,0.039693119748748576
+temporizador cocina digital,Home & Garden,0,0.04114113997466741
+sellador bolsas plastico,Home & Garden,0,0.047454055670707054
+organizador refrigerador,Home & Garden,0,0.06001577675315931
+contenedores alimentos hermeticos,Home & Garden,0,0.03445825944336946
+lonchera termica,Luggage & Bags,0,0.048884328849905075
+soporte esponja fregadero,Home & Garden,0,0.040664004720968046
+cepillo limpieza cocina,Home & Garden,0,0.04235752797662997
+tapete secado platos,Computer & Office,0,0.03617554337455361
+cepillo wc silicona,Home & Garden,0,0.03575384937456664
+mopa giratoria,Home & Garden,0,0.037375336572687115
+organizador asiento coche,"Automobiles, Parts & Accessories",0,0.03513017194850961
+inflador neumaticos portatil,"Automobiles, Parts & Accessories",0,0.04119875503368757
+medidor presion llantas,Tools,0,0.05654876770083221
+sensor estacionamiento coche,Electronic Components & Supplies,0,0.044375513455175465
+soporte monitor portatil,Home & Garden,0,0.08064556422531294
+luz trasera bicicleta,Sports & Entertainment,0,0.04573071979227214
+reloj minimalista acero,Watches,0,0.03757495405272435
+reloj casual hombre,Watches,0,0.038593014912546235
+reloj mujer elegante,Watches,0,0.08358677493917238
+reloj cronografo,Watches,0,0.08330537641054385
+reloj deportivo silicona,Watches,0,0.03513017194850961
+pulsera acero inoxidable,Jewelry & Accessories,0,0.0439212812674041
+pulsera cuero hombre,Watches,0,0.04373523744659171
+anillo acero inoxidable,Jewelry & Accessories,0,0.047200426871345895
+aretes acero inoxidable,Jewelry & Accessories,0,0.11371991968254982
+joyero portatil viaje,Jewelry & Accessories,0,0.04211153169082253
+rodillera deportiva,Sports & Entertainment,0,0.039395165080400925
+muñequera deportiva,Sports & Entertainment,0,0.047454055670707054
+cinturon fitness,Sports & Entertainment,0,0.03714192530176875
+cuerda saltar profesional,Sports & Entertainment,0,0.04424674723263265
+pesas tobillo ajustables,Sports & Entertainment,0,0.03482227712981533
+botella shaker gimnasio,Home & Garden,0,0.04019217110409559
+pastillero semanal,Beauty & Health,0,0.04424674723263265
+marcador paginas magnetico,Office & School Supplies,0,0.03628171256360055
+cojin lumbar silla,Home & Garden,0,0.04187178085589934
+Pelador de papas,Home & Garden,0,0.11845890197943264
+regleta enchufes multiple,Computer & Office,0,0.03835678819464682
+aro de luz,Consumer Electronics,0,0.18407339589089008
+temporizador enchufe digital,Tools,0,0.04322937345415988
+medidor consumo energia,Tools,0,0.04285364671293621
+humidificador de aire,Home Appliances,1,0.9506993499932134
+camara seguridad interior,Security & Protection,0,0.05944199526005473
+timbre inalambrico casa,Home Improvement,0,0.043990283089201
+cerradura digital hogar,Home Improvement,0,0.044375513455175465
+caja fuerte pequeña,Home & Garden,0,0.035759091220698515
+organizador de cables,Consumer Electronics,1,0.8791725818123955
+organizador de cajones,Home & Garden,1,0.9107304460747473
+protector de pantalla,Phones & Telecommunications Accessories,0,0.026479067470803613
+alfombra entrada antideslizante,Home & Garden,0,0.03995822565782262
+cerradura inteligente,Security & Protection,0,0.3738145075588175
+candado inteligente,Home Improvement,0,0.013636543995121465
+rizador de cabello,Beauty & Health,0,0.04418701309924386
+depilador facial,Beauty & Health,0,0.07511883659999578
+espejo de maquillaje,Beauty & Health,1,0.9619005627065411
+cojin lumbar,Beauty & Health,1,0.8485965171048654
+faja lumbar soporte,Underwear,0,0.07980072872226403
+soporte para laptop,Computer & Office,1,0.9775671861036048
+soporte para monitor,"Automobiles, Parts & Accessories",0,0.20947562296035438
+auriculares bluetooth,Consumer Electronics,0,0.44572688381674186
+altavoz bluetooth,Consumer Electronics,0,0.19302383021013958
+reloj digital,Tools,0,0.20180507592557753
+bascula digital,Home & Garden,0,0.13123456846551054
+linterna recargable,Consumer Electronics,1,0.9612463131619539
+sensor de movimiento,Lights & Lighting,0,0.3876081178741554
+cargador inalambrico,Phones & Telecommunications Accessories,0,0.04344518251643218
+corrector juanetes,Beauty & Health,0,0.035756994393451265
+separador dedos pie,Beauty & Health,0,0.04470678516560028
+lapiz digital,Tools,1,0.8505641562890303
+oximetro pulso digital,Beauty & Health,0,0.03421427312046819
+soporte para bicicleta,Sports & Entertainment,1,0.9697222999802224
+bolsa termica,Consumer Electronics,1,0.9883470096802485
+mini ventilador,Home Appliances,1,0.8058693311655382
+cargador solar,Lights & Lighting,0,0.12580306022703872
+vinilos decorativos pared,Home & Garden,0,0.03440367120346688
+reloj pared moderno,Lights & Lighting,0,0.043990283089201
+reloj inteligente,Tools,0,0.028516298701478388
+termo acero inoxidable,Home & Garden,1,0.9845425062521076
+botella deportiva,Sports & Entertainment,0,0.2517251473317014
+licuadora portatil,Home & Garden,1,0.9868994327367108
+batidora de mano,Home & Garden,1,0.9673540079574807
+sarten antiadherente,Home & Garden,1,0.9605521281586836
+olla a presion,Home & Garden,1,0.9561624969017887
+juego de cuchillos,Tools,1,0.9748712642992815
+dispensador de jabon,Home & Garden,1,0.7723602648344332
+organizador de escritorio,Home & Garden,0,0.320670056490935
+lampara de mesa,Lights & Lighting,1,0.5981918421262913
+lampara led,Lights & Lighting,0,0.019101839462736286
+foco inteligente,Lights & Lighting,0,0.36806605494037314
+enchufe inteligente,Phones & Telecommunications Accessories,1,0.9377838831568364
+tripode para camara,Consumer Electronics,0,0.08366393297370814
+estabilizador movil,Consumer Electronics,0,0.08064556422531294
+soporte para celular,Computer & Office,0,0.12130173532027297
+cable hdmi,Consumer Electronics,0,0.015004760219759347
+adaptador usb c,Phones & Telecommunications Accessories,0,0.030318188574720104
+memoria micro sd,Computer & Office,0,0.3082243664544495
+disco duro externo,Computer & Office,0,0.028050821438359963
+ssd portatil,Computer & Office,1,0.9348463835414115
+router wifi,Computer & Office,0,0.005933506207030157
+repetidor wifi,Computer & Office,0,0.009712042404742995
+teclado inalambrico,Computer & Office,0,0.08721265619349439
+mouse ergonomico,Computer & Office,0,0.4851643507036219
+alfombrilla mouse,Computer & Office,0,0.1290557669111169
+silla ergonomica,Furniture,1,0.923412776129349
+mesa plegable,Furniture,0,0.012969731514449237
+soporte laptop,Computer & Office,1,0.9872141529185314
+ventilador de torre,Home & Garden,1,0.8191181521742353
+aire acondicionado portatil,"Automobiles, Parts & Accessories",1,0.7184606426147464
+calefactor electrico,Consumer Electronics,1,0.877196051736765
+humidificador,Home Appliances,0,0.02695954695138057
+deshumidificador,Home & Garden,1,0.8404093281199603
+difusor de aromas,Home Appliances,1,0.9648594359816901
+colchon inflable,Sports & Entertainment,0,0.0027564574715815927
+saco de dormir,Mother & Kids,1,0.9743377584970582
+tienda de campaña,Home & Garden,0,0.04713831166827333
+linterna frontal,Lights & Lighting,0,0.26589979636789085
+navaja multiusos,Tools,1,0.9491987067660754
+kit primeros auxilios,Security & Protection,1,0.9157314937086646
+mochila escolar,Luggage & Bags,1,0.9845190564445032
+bolsa de gimnasio,Home & Garden,0,0.36824513747658943
+maleta de viaje,Luggage & Bags,0,0.008472390556383054
+candado seguridad,Home Improvement,1,0.802962427509626
+balanza digital,Tools,1,0.8886476359328529
+bascula cocina,Home & Garden,1,0.9888332288815795
+oximetro,Beauty & Health,0,0.018200196373052542
+masajeador electrico,Industrial & Business,1,0.9764254687223806
+rodillo masaje,Beauty & Health,1,0.9714578850812258
+mancuernas,Sports & Entertainment,0,0.027841687934629725
+kettlebell,Jewelry & Accessories,0,0.11686045013607473
+bloques yoga,Sports & Entertainment,1,0.8611957291133305
+rueda abdominal,Beauty & Health,1,0.9662169392917004
+cuerda para saltar,Sports & Entertainment,0,0.3967836888232991
+casco bicicleta,Motorcycle Equipments & Parts,1,0.9839577962153494
+luces bicicleta,Sports & Entertainment,0,0.1100480474471869
+bomba de aire,Home & Garden,0,0.01220449706625458
+patines en linea,Shoes,1,0.9721330890640826
+skateboard,Home Improvement,0,0.0673339603905172
+balon futbol,Sports & Entertainment,0,0.3588048598788187
+balon baloncesto,Sports & Entertainment,1,0.8719610270281999
+balon voleibol,Sports & Entertainment,0,0.4058467988025558
+raqueta tenis,Sports & Entertainment,1,0.8686591951838355
+mesa ping pong,Sports & Entertainment,1,0.9870478984265201
+dardos,Toys & Hobbies,0,0.24411771154389492
+juego cartas,Sports & Entertainment,0,0.011811787845640213
+rompecabezas,Toys & Hobbies,0,0.09625004973401075
+figuras coleccionables,Toys & Hobbies,1,0.9707011991745508
+set de pintura,Office & School Supplies,1,0.9023880233677072
+acuarelas,Office & School Supplies,0,0.19302383021013958
+lapices de colores,Beauty & Health,1,0.9611889150170047
+cuaderno notas,Office & School Supplies,0,0.03484912612756294
+agenda,Office & School Supplies,0,0.061270198593726295
+marcadores permanentes,Office & School Supplies,1,0.9258800269721265
+pizarra blanca,Office & School Supplies,0,0.3515758808499872
+reloj de pared,Tools,0,0.4383218123296807
+cuadro decorativo,Home & Garden,0,0.31532731043311046
+espejo decorativo,Home & Garden,1,0.9156720666632641
+velas aromaticas,Home & Garden,0,0.11233044584923106
+portavelas,Home & Garden,1,0.968146859209506
+plantas artificiales,Home & Garden,0,0.15782166878638992
+maceta ceramica,Home & Garden,1,0.9756695989019274
+regadera jardin,Lights & Lighting,1,0.9114165454856983
+herramientas jardin,Home & Garden,0,0.1440185673194718
+tijeras podar,Tools,1,0.9878213706574659
+manguera jardin,Lights & Lighting,0,0.17334171616310887
+aspersor agua,Home & Garden,1,0.96703646474992
+parrilla carbon,"Automobiles, Parts & Accessories",0,0.0670926262379438
+nevera portatil,Home & Garden,0,0.11325492437360737
+utensilios cocina,Home & Garden,1,0.8292670422403166
+delantal cocina,Home & Garden,1,0.6383190550192849
+reloj despertador,Home & Garden,0,0.17824948186632508
+lampara nocturna,Lights & Lighting,0,0.03624786003439966
+cortinas tela,Home & Garden,0,0.18616377390167968
+alfombra sala,Home & Garden,1,0.9711359419692814
+cojines decorativos,Home & Garden,1,0.9313385301992061
+fundas cojin,Home & Garden,0,0.17433681367650022
+ropa de cama,Home & Garden,1,0.7707318990640554
+edredon,Home & Garden,0,0.011992865623488199
+mantas,Home & Garden,1,0.8444963523021097
+organizadores ropa,Furniture,0,0.022975835947613422
+zapatero,Shoes,0,0.011122568979694684
+caja organizadora,Home & Garden,1,0.5460405996514689
+estanteria metalica,Home & Garden,0,0.022412396029039234
+carrito organizador,Home & Garden,0,0.08491174052490628
+dispensador agua,Home & Garden,0,0.05736248103433869
+purificador aire,Home Appliances,1,0.6787913772064431
+cafetera italiana,Home & Garden,1,0.9913893318667858
+tetera acero,Home & Garden,0,0.3323503514727699
+molinillo cafe,Home & Garden,1,0.5729765027719496
+espumador leche,Home Appliances,1,0.9840305461991136
+vajilla porcelana,Home & Garden,1,0.9525769810074475
+vasos vidrio,Home & Garden,0,0.06043426970224803
+copas vino,Home & Garden,1,0.9834518727652258
+cubiertos acero,Home & Garden,1,0.9376039700153262
+abridor botellas,Home & Garden,0,0.04523924482757833
+sacacorchos,Home & Garden,1,0.9392058412775666

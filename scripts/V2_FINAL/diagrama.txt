@@ -1,0 +1,45 @@
+             ┌─────────────────────────────┐
+             │      ETL & Feature Eng.     │
+             |    dataset_validated.csv    |
+             └───────────┬─────────────────┘
+                         │
+       ┌─────────────────┼─────────────────┐
+       │                 │                 │
+       ▼                 ▼                 ▼
+┌───────────────┐  ┌───────────────┐  ┌───────────────┐
+│ Logistic      │  │ Random Forest │  │ XGBoost       │
+│ Regression    │  │ (Forecasting  │  │ (Trend Score  │
+│ - Probabilidad│  │ temporal y     │  │ y clasificación)│
+│   de éxito    │  │ crecimiento)  │  │               │
+│ - Interpret.  │  │ - Probabilidades│ │ - Probabilidades│
+│ - Baseline    │  │ - Importancia │  │ - SHAP Value  │
+└───────────────┘  └───────────────┘  └───────────────┘
+       │                 │                 │
+       └───────────┬─────┴─────┬───────────┘
+                   │           │
+                   ▼           ▼
+             ┌─────────────────────────────┐
+             │       K-Means Clustering    │
+             │  - Segmentación de productos│
+             │  - Viral / Barato masivo /  │
+             │    Estable / Muerto         │
+             └───────────┬─────────────────┘
+                         │
+                         ▼
+             ┌─────────────────────────────┐
+             │         Prophet             │
+             │ - Forecast temporal trends │
+             │ - Predicción por país      │
+             │ - Identificación estacional│
+             └───────────┬─────────────────┘
+                         │
+                         ▼
+             ┌─────────────────────────────┐
+             │    Product Opportunity      │
+             │         Score (POS)         │
+             │ - Combinación de:           │
+             │   - Probabilidad éxito      │
+             │   - Trend Quality           │
+             │   - Consistency Score       │
+             │   - Social Velocity         │
+             └─────────────────────────────┘

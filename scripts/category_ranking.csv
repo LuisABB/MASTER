@@ -1,0 +1,28 @@
+category_name,total_products,avg_POS,max_POS,avg_success_proba,avg_trend_quality,avg_social_velocity,avg_xgb_prob_high,tier_HIGH,tier_MEDIUM,tier_LOW,cluster_viral,cluster_barato,cluster_estable,cluster_muerto,top_product_1,top_product_1_POS,top_product_2,top_product_2_POS,top_product_3,top_product_3_POS,computed_at
+Motorcycle Equipments & Parts,1,0.6643,0.6643,0.9998,3.5016,0.0,0.9422,1,0,0,1,0,0,0,casco bicicleta,0.6643,,,,,2026-05-21T16:04:52.108035+00:00
+Industrial & Business,1,0.658,0.658,0.9998,3.2645,11.5455,0.9422,1,0,0,0,1,0,0,masajeador electrico,0.658,,,,,2026-05-21T16:04:52.108035+00:00
+Mother & Kids,1,0.6553,0.6553,0.9996,3.1773,0.0,0.9416,1,0,0,1,0,0,0,saco de dormir,0.6553,,,,,2026-05-21T16:04:52.108035+00:00
+Men's Clothing,1,0.6283,0.6283,0.9969,2.1866,56.0,0.0121,0,1,0,1,0,0,0,traje de buzo,0.6283,,,,,2026-05-21T16:04:52.108035+00:00
+Apparel Accessories,5,0.4165,0.7063,0.4449,2.1595,463.3942,0.3588,1,3,1,3,0,2,0,guantes de futbol,0.7063,gafas de sol,0.512,montura para caballo,0.3762,2026-05-21T16:04:52.108035+00:00
+Toys & Hobbies,6,0.3794,0.7684,0.3441,2.0084,740.0371,0.3097,1,1,4,1,1,0,4,cama de niño,0.7684,figuras coleccionables,0.6411,dardos,0.2645,2026-05-21T16:04:52.108035+00:00
+Home Appliances,14,0.3741,0.6575,0.4327,1.1535,44.8801,0.139,2,4,8,3,4,2,5,espumador leche,0.6575,difusor de aromas,0.6514,humidificador de aire,0.6442,2026-05-21T16:04:52.108035+00:00
+Shoes,2,0.3667,0.6488,0.5025,-0.0796,0.0,0.0203,1,0,1,1,0,0,1,patines en linea,0.6488,zapatero,0.0846,,,2026-05-21T16:04:52.108035+00:00
+Security & Protection,3,0.34,0.6022,0.343,1.2561,13.9365,0.0112,0,1,2,1,0,0,2,kit primeros auxilios,0.6022,cerradura inteligente,0.2463,camara seguridad interior,0.1714,2026-05-21T16:04:52.108035+00:00
+Tools,15,0.3352,0.6616,0.3428,0.9923,84.0197,0.1317,2,4,9,3,2,3,7,tijeras podar,0.6616,juego de cuchillos,0.6498,navaja multiusos,0.6282,2026-05-21T16:04:52.108035+00:00
+Home & Garden,94,0.324,0.6702,0.3158,0.7522,189.5839,0.0963,9,24,61,21,10,17,46,ganchos ropa,0.6702,bascula cocina,0.669,cafetera italiana,0.6672,2026-05-21T16:04:52.108035+00:00
+Consumer Electronics,19,0.3136,0.7398,0.2723,0.8043,370.149,0.1053,3,2,14,5,0,5,9,calefactor electrico,0.7398,bolsa termica,0.6713,taladro de bateria,0.6558,2026-05-21T16:04:52.108035+00:00
+"Automobiles, Parts & Accessories",11,0.3114,0.6659,0.269,0.7511,127.1758,0.0914,1,3,7,2,0,3,6,carros hibridos,0.6659,faros led para carro,0.5703,aire acondicionado portatil,0.5296,2026-05-21T16:04:52.108035+00:00
+"Sports Shoes,Clothing&Accessories",4,0.3104,0.6694,0.2586,1.2063,207.6222,0.2398,1,0,3,1,2,0,1,camisetas de futbol,0.6694,licra de mujer,0.2242,guantes de box,0.1844,2026-05-21T16:04:52.108035+00:00
+Beauty & Health,21,0.3069,0.6528,0.2945,0.5845,104.9862,0.0951,2,4,15,5,1,5,10,rodillo masaje,0.6528,rueda abdominal,0.6511,espejo de maquillaje,0.6456,2026-05-21T16:04:52.108035+00:00
+Office & School Supplies,8,0.3028,0.5991,0.2599,1.075,38.3021,0.0076,0,2,6,2,0,1,5,marcadores permanentes,0.5991,set de pintura,0.5882,pizarra blanca,0.2557,2026-05-21T16:04:52.108035+00:00
+Sports & Entertainment,28,0.2975,0.6694,0.2612,0.6346,281.6138,0.1022,3,7,18,4,1,5,18,ajedrez profesional,0.6694,mesa ping pong,0.6614,soporte para bicicleta,0.652,2026-05-21T16:04:52.108035+00:00
+Luggage & Bags,5,0.2801,0.6639,0.222,0.4283,486.4621,0.1917,1,0,4,1,0,2,2,mochila escolar,0.6639,lonchera termica,0.2227,Mochila impermeable,0.2214,2026-05-21T16:04:52.108035+00:00
+Furniture,4,0.2718,0.646,0.2665,-0.1643,26.1871,0.0064,0,1,3,0,3,0,1,silla ergonomica,0.646,purificador aire portatil,0.185,organizadores ropa,0.1774,2026-05-21T16:04:52.108035+00:00
+Lights & Lighting,15,0.2524,0.608,0.152,0.4833,87.2267,0.0062,0,4,11,3,0,4,8,regadera jardin,0.608,lampara de mesa,0.4095,sensor de movimiento,0.4072,2026-05-21T16:04:52.108035+00:00
+Computer & Office,24,0.2354,0.6646,0.1363,0.2766,154.7747,0.0838,2,1,21,3,1,4,16,soporte laptop,0.6646,soporte para laptop,0.6536,ssd portatil,0.5931,2026-05-21T16:04:52.108035+00:00
+Jewelry & Accessories,9,0.2348,0.6581,0.1197,0.4854,175.6481,0.1088,1,0,8,1,0,5,3,collar de perlas,0.6581,cajas de carton,0.2479,kettlebell,0.2037,2026-05-21T16:04:52.108035+00:00
+Home Improvement,7,0.2148,0.6167,0.1482,-0.5223,16.9148,0.0053,0,1,6,0,1,0,6,candado seguridad,0.6167,skateboard,0.1935,dispensador jabon automatico,0.1753,2026-05-21T16:04:52.108035+00:00
+Phones & Telecommunications Accessories,14,0.2115,0.6357,0.0785,-0.2569,257.7151,0.0048,0,2,12,1,0,3,10,enchufe inteligente,0.6357,pantallas,0.3161,iphone,0.2221,2026-05-21T16:04:52.108035+00:00
+Electronic Components & Supplies,3,0.1935,0.2054,0.0102,0.3237,481.8167,0.0045,0,0,3,0,0,2,1,sensor estacionamiento coche,0.2054,monopoli,0.199,arduino,0.1762,2026-05-21T16:04:52.108035+00:00
+Underwear,3,0.1887,0.2064,0.0146,0.3877,19.6248,0.0045,0,0,3,0,0,1,2,medias de compresion,0.2064,faja lumbar soporte,0.1807,calcetines,0.1789,2026-05-21T16:04:52.108035+00:00
+Watches,7,0.1744,0.1839,0.0077,0.0624,33.2454,0.0042,0,0,7,0,0,2,5,xiaomi tag,0.1839,reloj cronografo,0.1783,reloj mujer elegante,0.1766,2026-05-21T16:04:52.108035+00:00
