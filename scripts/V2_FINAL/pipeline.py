@@ -18,7 +18,8 @@ from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, LabelEncoder
 from sklearn.model_selection import train_test_split, TimeSeriesSplit
 from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, BaggingClassifier
+from sklearn.utils import resample
 from sklearn.cluster import KMeans
 
 warnings.filterwarnings("ignore")
@@ -160,22 +161,60 @@ df_sorted = df.sort_values("generated_at").reset_index(drop=True)
 X_rf_s = df_sorted[rf_avail].fillna(0)
 y_rf_s = df_sorted["success_rf"]
 
+# ── TimeSeriesSplit con Bootstrap ──────────────────────────────────────────
 tscv = TimeSeriesSplit(n_splits=3)
 last_rf_model = None
+bootstrap_scores_rf = []
+
 for fold, (tr_idx, te_idx) in enumerate(tscv.split(X_rf_s)):
+    X_tr_fold = X_rf_s.iloc[tr_idx]
+    y_tr_fold = y_rf_s.iloc[tr_idx]
+    X_te_fold = X_rf_s.iloc[te_idx]
+    y_te_fold = y_rf_s.iloc[te_idx]
+    
+    # Modelo base con bootstrap=True (ya es default en RandomForestClassifier)
     rf_model = RandomForestClassifier(
-        n_estimators=200, max_depth=10, class_weight="balanced", random_state=42
+        n_estimators=200, max_depth=10, class_weight="balanced", 
+        bootstrap=True, random_state=42
     )
-    rf_model.fit(X_rf_s.iloc[tr_idx], y_rf_s.iloc[tr_idx])
+    rf_model.fit(X_tr_fold, y_tr_fold)
     last_rf_model = rf_model
+    
     fold_auc = "N/A"
     try:
         from sklearn.metrics import roc_auc_score
-        proba_te = rf_model.predict_proba(X_rf_s.iloc[te_idx])[:, 1]
-        fold_auc = f"{roc_auc_score(y_rf_s.iloc[te_idx], proba_te):.4f}"
+        proba_te = rf_model.predict_proba(X_te_fold)[:, 1]
+        fold_auc_val = roc_auc_score(y_te_fold, proba_te)
+        fold_auc = f"{fold_auc_val:.4f}"
+        bootstrap_scores_rf.append(fold_auc_val)
     except Exception:
         pass
-    print(f"  Fold {fold+1} ROC-AUC: {fold_auc}")
+    print(f"  Fold {fold+1} ROC-AUC (CV): {fold_auc}")
+    
+    # ── Evaluación Bootstrap ────────────────────────────────────────────────
+    n_bootstrap = 30
+    bootstrap_auc_scores = []
+    for b in range(n_bootstrap):
+        X_boot, y_boot = resample(X_tr_fold, y_tr_fold, random_state=42+b)
+        rf_boot = RandomForestClassifier(
+            n_estimators=100, max_depth=10, class_weight="balanced",
+            bootstrap=True, random_state=42+b
+        )
+        rf_boot.fit(X_boot, y_boot)
+        proba_boot = rf_boot.predict_proba(X_te_fold)[:, 1]
+        try:
+            auc_boot = roc_auc_score(y_te_fold, proba_boot)
+            bootstrap_auc_scores.append(auc_boot)
+        except Exception:
+            pass
+    
+    if bootstrap_auc_scores:
+        mean_boot = np.mean(bootstrap_auc_scores)
+        std_boot = np.std(bootstrap_auc_scores)
+        print(f"           Bootstrap ({n_bootstrap}): {mean_boot:.4f} ± {std_boot:.4f}")
+
+if bootstrap_scores_rf:
+    print(f"  CV Mean ROC-AUC: {np.mean(bootstrap_scores_rf):.4f} ± {np.std(bootstrap_scores_rf):.4f}")
 
 # Predecir en todo el dataset (mismo orden que df_sorted)
 rf_probs_sorted = last_rf_model.predict_proba(X_rf_s)[:, 1]
@@ -232,20 +271,68 @@ try:
         random_state=42,
         eval_metric="mlogloss",
     )
+    
+    X_tr_x, X_te_x, y_tr_x, y_te_x = train_test_split(
+        X_xgb.values, y_xgb, test_size=0.2, random_state=42, stratify=y_xgb
+    )
+    
+    # ── XGBoost Base Model ──────────────────────────────────────────────────
     # use_label_encoder eliminado en XGBoost >= 1.6
     try:
-        xgb_clf = XGBClassifier(**xgb_params, use_label_encoder=False)
-        X_tr_x, X_te_x, y_tr_x, y_te_x = train_test_split(
-            X_xgb.values, y_xgb, test_size=0.2, random_state=42, stratify=y_xgb
-        )
-        xgb_clf.fit(X_tr_x, y_tr_x, eval_set=[(X_te_x, y_te_x)], verbose=False)
+        xgb_base = XGBClassifier(**xgb_params, use_label_encoder=False)
     except TypeError:
         # XGBoost >= 1.6 no acepta use_label_encoder
-        xgb_clf = XGBClassifier(**xgb_params)
-        X_tr_x, X_te_x, y_tr_x, y_te_x = train_test_split(
-            X_xgb.values, y_xgb, test_size=0.2, random_state=42, stratify=y_xgb
-        )
-        xgb_clf.fit(X_tr_x, y_tr_x, eval_set=[(X_te_x, y_te_x)], verbose=False)
+        xgb_base = XGBClassifier(**xgb_params)
+    
+    # ── BaggingClassifier con Bootstrap para XGBoost ──────────────────────
+    xgb_clf = BaggingClassifier(
+        estimator=xgb_base,
+        n_estimators=10,
+        bootstrap=True,
+        random_state=42,
+        n_jobs=-1,
+        verbose=0
+    )
+    xgb_clf.fit(X_tr_x, y_tr_x)
+    
+    # ── Evaluación Bootstrap de XGBoost ────────────────────────────────────
+    from sklearn.metrics import accuracy_score, log_loss
+    try:
+        y_pred_xgb = xgb_clf.predict(X_te_x)
+        acc_xgb = accuracy_score(y_te_x, y_pred_xgb)
+        print(f"  XGBoost (Bagging) Test Accuracy: {acc_xgb:.4f}")
+    except Exception as e:
+        print(f"  XGBoost accuracy: {e}")
+    
+    # Bootstrap evaluation: entrenar múltiples versiones con muestras bootstrap
+    n_bootstrap_xgb = 15
+    bootstrap_acc_scores = []
+    print(f"  XGBoost Bootstrap Evaluation ({n_bootstrap_xgb} iteraciones):")
+    
+    for b in range(n_bootstrap_xgb):
+        X_boot_x, y_boot_x = resample(X_tr_x, y_tr_x, random_state=42+b)
+        
+        try:
+            xgb_boot = XGBClassifier(**xgb_params, use_label_encoder=False)
+        except TypeError:
+            xgb_boot = XGBClassifier(**xgb_params)
+        
+        xgb_boot.fit(X_boot_x, y_boot_x, verbose=False)
+        y_pred_boot = xgb_boot.predict(X_te_x)
+        
+        try:
+            acc_boot = accuracy_score(y_te_x, y_pred_boot)
+            bootstrap_acc_scores.append(acc_boot)
+        except Exception:
+            pass
+    
+    if bootstrap_acc_scores:
+        mean_acc_boot = np.mean(bootstrap_acc_scores)
+        std_acc_boot = np.std(bootstrap_acc_scores)
+        ci_lower = np.percentile(bootstrap_acc_scores, 2.5)
+        ci_upper = np.percentile(bootstrap_acc_scores, 97.5)
+        print(f"    Mean Accuracy: {mean_acc_boot:.4f} ± {std_acc_boot:.4f}")
+        print(f"    95% CI: [{ci_lower:.4f}, {ci_upper:.4f}]")
 
     probs_xgb = xgb_clf.predict_proba(X_xgb.values)
     classes_xgb = list(le_xgb.classes_)  # e.g. ['HIGH', 'LOW', 'MEDIUM'] alphabetical
